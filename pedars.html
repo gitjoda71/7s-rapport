@@ -51,7 +51,7 @@
         input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
 
         .input-row{display:flex;gap:8px;}
-        .input-row>*{flex:1;min-width:0;}
+        .input-row input,.input-row select{flex:1;min-width:0;}
         .input-col2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
 
         /* Dynamiska kort (Pers avvikelser, Fordon, Rep) */
@@ -94,6 +94,9 @@
         .btn-secondary:hover{background:var(--bg-card);color:var(--text-primary);}
         .btn-danger{flex:1;background:var(--danger);color:#fff;}
         .btn-danger:hover{background:var(--danger-hover);}
+        .btn-sm{min-height:40px;padding:8px 14px;border-radius:var(--radius-sm);font-size:.85rem;white-space:nowrap;flex-shrink:0;}
+        .btn-time{background:var(--accent-dim);color:var(--accent);}
+        .btn-time:hover{background:var(--border-focus);}
         .button-group{display:flex;gap:10px;}
         .divider{border:none;border-top:1px solid var(--border);margin:16px 0;}
 
@@ -136,7 +139,10 @@
                 </div>
                 <div>
                     <div class="sub-label" style="margin-top:0">TNR</div>
-                    <input type="text" id="tnr" placeholder="014" inputmode="numeric" autocomplete="off" style="margin-top:4px">
+                    <div class="input-row" style="margin-top:4px">
+                        <input type="text" id="tnr" placeholder="DDHHMM" inputmode="numeric" maxlength="6" autocomplete="off">
+                        <button class="btn btn-sm btn-time" onclick="setNow()">Nu</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -432,7 +438,12 @@ function showFeedback(){const el=document.getElementById('copyFeedback');el.clas
 function backToEdit(){document.getElementById('formView').classList.remove('hidden');document.getElementById('resultView').classList.remove('active');}
 function resetForm(){if(!confirm('Nollställ?'))return;location.reload();}
 
+function setNow(){
+    const now=new Date(),p=n=>String(n).padStart(2,'0');
+    document.getElementById('tnr').value=p(now.getDate())+p(now.getHours())+p(now.getMinutes());
+}
 document.addEventListener('DOMContentLoaded',()=>{
+    setNow();
     initAmmo();
     addFordon();
 });
