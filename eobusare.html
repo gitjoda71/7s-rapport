@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0d1f0d">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="EOBUSARE">
+    <title>EOBUSARE – Eldställning</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary:#0d1f0d;--bg-secondary:#152815;--bg-card:#1a321a;--bg-input:#0f240f;
+            --border:#2d4a2d;--border-focus:#4a7c4a;--text-primary:#e8f0e8;--text-secondary:#8aaa8a;
+            --text-muted:#5a7a5a;--accent:#4caf50;--accent-hover:#66bb6a;--accent-dim:#1e3d1e;
+            --danger:#c62828;--danger-hover:#e53935;--info:#1565c0;--info-hover:#1976d2;
+            --radius:8px;--radius-sm:4px;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg-primary); color: var(--text-primary); min-height: 100vh; padding: 16px; }
+        .container { max-width: 560px; margin: 0 auto; }
+
+        .topbar { display: flex; align-items: center; gap: 12px; padding: 12px 0 16px; }
+        .back-btn { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: var(--radius-sm); background: var(--bg-secondary); border: 1px solid var(--border); color: var(--text-secondary); text-decoration: none; font-size: 1.1rem; flex-shrink: 0; transition: background 0.15s, color 0.15s; }
+        .back-btn:hover { background: var(--bg-card); color: var(--text-primary); }
+        .topbar-title h1 { font-size: 1.4rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); }
+        .topbar-title p { font-size: 0.72rem; color: var(--text-muted); letter-spacing: 0.06em; margin-top: 2px; }
+
+        .tab-nav { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px; margin-bottom: 16px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius); padding: 4px; }
+        .tab-link { text-align: center; padding: 8px 2px; border-radius: var(--radius-sm); color: var(--text-muted); text-decoration: none; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.04em; transition: background 0.15s, color 0.15s; -webkit-tap-highlight-color: transparent; }
+        .tab-link:hover { background: var(--bg-card); color: var(--text-secondary); }
+        .tab-link.active { background: var(--accent-dim); color: var(--accent); }
+
+        .progress-bar-wrap { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 20px; height: 10px; margin-bottom: 6px; overflow: hidden; }
+        .progress-bar-inner { background: var(--accent); height: 100%; border-radius: 20px; transition: width .3s; }
+        .progress-text { text-align: center; font-size: .75rem; color: var(--text-muted); margin-bottom: 14px; }
+
+        .section-label { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .section-letter { width: 32px; height: 32px; border-radius: 50%; background: var(--accent-dim); border: 1px solid var(--accent); color: var(--accent); font-size: 1rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .section-title { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-secondary); }
+        .section-subtitle { font-size: 0.68rem; color: var(--text-muted); margin-top: 1px; }
+
+        .form-group { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 10px; }
+        .form-group.section-group { border-left: 3px solid var(--accent); }
+        label { font-weight: 600; font-size: 0.82rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-secondary); display: block; margin-bottom: 6px; }
+        .field-hint { font-size: 0.72rem; color: var(--text-muted); margin-top: 5px; opacity: 0.75; }
+
+        input[type="text"], input[type="number"], input[type="datetime-local"], textarea {
+            width: 100%; background: var(--bg-input); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-primary); font-family: inherit; font-size: 1rem; padding: 12px 14px; outline: none; transition: border-color 0.15s; -webkit-appearance: none; appearance: none;
+        }
+        input[type="text"]:focus, input[type="number"]:focus, input[type="datetime-local"]:focus, textarea:focus { border-color: var(--border-focus); }
+        input[type="datetime-local"] { color-scheme: dark; }
+        textarea { resize: vertical; min-height: 72px; line-height: 1.5; }
+
+        .input-row { display: flex; gap: 8px; align-items: flex-start; }
+        .input-row input { flex: 1; min-width: 0; }
+
+        .check-row { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; cursor: pointer; font-size: .95rem; color: var(--text-primary); line-height: 1.4; }
+        .check-row input[type=checkbox] { width: 22px; height: 22px; min-width: 22px; accent-color: var(--accent); margin-top: 2px; cursor: pointer; }
+        .step-card.done { border-left-color: var(--accent); opacity: .85; }
+
+        .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 12px 20px; border: none; border-radius: var(--radius); font-family: inherit; font-size: 0.95rem; font-weight: 600; letter-spacing: 0.04em; cursor: pointer; transition: background 0.15s, transform 0.1s; -webkit-tap-highlight-color: transparent; }
+        .btn:active { transform: scale(0.97); }
+        .btn-primary { width: 100%; background: var(--accent); color: #fff; margin-top: 8px; font-size: 1rem; border: none; }
+        .btn-primary:hover { background: var(--accent-hover); }
+        .btn-sm { min-height: 40px; padding: 8px 14px; border-radius: var(--radius-sm); font-size: 0.85rem; white-space: nowrap; flex-shrink: 0; }
+        .btn-time { background: var(--accent-dim); color: var(--accent); border: none; }
+        .btn-time:hover { background: var(--border-focus); }
+        .btn-copy { width: 100%; background: var(--info); color: #fff; margin-bottom: 12px; border: none; }
+        .btn-copy:hover { background: var(--info-hover); }
+        .btn-secondary { flex: 1; background: var(--bg-secondary); color: var(--text-secondary); border: 1px solid var(--border); }
+        .btn-secondary:hover { background: var(--bg-card); color: var(--text-primary); }
+        .btn-danger { width: 100%; background: var(--danger); color: #fff; border: none; margin-top: 8px; }
+        .btn-danger:hover { background: var(--danger-hover); }
+        .btn-danger.flex1 { flex: 1; margin-top: 0; }
+        .btn-add { background: var(--accent-dim); color: var(--accent); border: 1px dashed var(--accent); border-radius: var(--radius-sm); padding: 8px 14px; font-size: 0.82rem; font-weight: 600; cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; transition: background 0.15s; }
+        .btn-add:hover { background: var(--border-focus); }
+        .btn-remove-sm { background: none; border: none; color: var(--text-muted); font-size: 1rem; cursor: pointer; padding: 4px 8px; border-radius: var(--radius-sm); flex-shrink: 0; transition: color 0.15s; min-height: 40px; }
+        .btn-remove-sm:hover { color: var(--danger-hover); }
+        .button-group { display: flex; gap: 10px; }
+        .divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+
+        .upk-row { display: flex; gap: 6px; align-items: center; margin-bottom: 6px; }
+        .upk-row .inp-navn { flex: 1; min-width: 0; }
+        .upk-row .inp-riktn { width: 80px; flex-shrink: 0; }
+        .upk-row .inp-avst { width: 80px; flex-shrink: 0; }
+
+        .saved-items { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+        .saved-item { display: inline-flex; align-items: center; gap: 4px; background: var(--accent-dim); color: var(--text-secondary); font-size: 0.78rem; padding: 4px 8px; border-radius: 20px; cursor: pointer; transition: background 0.15s; }
+        .saved-item:hover { background: var(--border-focus); color: var(--text-primary); }
+        .saved-item .del { color: var(--text-muted); font-size: 1rem; line-height: 1; padding: 0 2px; }
+        .saved-item .del:hover { color: var(--danger-hover); }
+
+        .result-view { display: none; }
+        .result-view.active { display: block; }
+        .form-view.hidden { display: none; }
+        .result-header { font-size: 0.8rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); text-align: center; margin-bottom: 12px; }
+        .report-output { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; font-family: 'Courier New', monospace; font-size: 0.92rem; line-height: 1.9; white-space: pre-wrap; color: var(--text-primary); margin-bottom: 14px; }
+        .copy-feedback { text-align: center; color: var(--accent); font-size: 0.85rem; font-weight: 600; height: 24px; opacity: 0; transition: opacity 0.2s; margin-bottom: 12px; }
+        .copy-feedback.show { opacity: 1; }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <div class="topbar">
+        <a href="index.html" class="back-btn">&#8592;</a>
+        <div class="topbar-title">
+            <h1>E.O.B.U.S.A.R.E</h1>
+            <p>Eldst&#228;llningschecklista</p>
+        </div>
+    </div>
+
+    <nav class="tab-nav">
+        <a href="obslosa.html" class="tab-link">OBSL&#214;SA</a>
+        <a href="fors.html" class="tab-link">FORS</a>
+        <a href="pedars.html" class="tab-link">PEDARS</a>
+        <a href="postschema.html" class="tab-link">SCHEMA</a>
+        <a href="eobusare.html" class="tab-link active">EOBUSARE</a>
+        <a href="obo.html" class="tab-link">OBO</a>
+        <a href="rassoika.html" class="tab-link">RASSOIKA</a>
+    </nav>
+
+    <div class="progress-bar-wrap">
+        <div class="progress-bar-inner" id="progressBar" style="width:0%"></div>
+    </div>
+    <div class="progress-text" id="progressText">0 / 8 steg klara</div>
+
+    <main>
+    <div class="form-view" id="formView">
+
+        <!-- TNR -->
+        <div class="form-group">
+            <label for="tnr">TNR</label>
+            <div class="input-row" style="margin-top:6px">
+                <input type="text" id="tnr" placeholder="DDHHMM" inputmode="numeric" maxlength="6" autocomplete="off">
+                <button class="btn btn-sm btn-time" onclick="setNow()">Nu</button>
+            </div>
+            <div class="field-hint" style="font-size:.72rem;color:var(--text-muted);margin-top:5px">Format: DDHHMM (dag–timme–minut, t.ex. 231430)</div>
+        </div>
+
+        <!-- Steg 1 – E = Eldst&#228;llning -->
+        <div class="form-group section-group step-card" id="step_1">
+            <div class="section-label">
+                <div class="section-letter step-letter" id="letter_1">E</div>
+                <div>
+                    <div class="section-title">Eldst&#228;llning</div>
+                    <div class="section-subtitle">Intag och positionering</div>
+                </div>
+                <div class="step-done-badge" id="badge_1" style="display:none;margin-left:auto;font-size:1.3rem;color:var(--accent)">&#10003;</div>
+            </div>
+            <label class="check-row"><input type="checkbox" class="step-check" data-step="1" onchange="updateProgress()"><span>Eldst&#228;llning intagen</span></label>
+            <input type="text" id="e1_position" placeholder="Position / plats (MGRS eller beskrivning)" style="margin-top:8px">
+        </div>
+
+        <!-- Steg 2 – O = Observat&#246;r -->
+        <div class="form-group section-group step-card" id="step_2">
+            <div class="section-label">
+                <div class="section-letter step-letter" id="letter_2">O</div>
+                <div>
+                    <div class="section-title">Observat&#246;r</div>
+                    <div class="section-subtitle">Vem och var</div>
+                </div>
+                <div class="step-done-badge" id="badge_2" style="display:none;margin-left:auto;font-size:1.3rem;color:var(--accent)">&#10003;</div>
+            </div>
+            <label class="check-row"><input type="checkbox" class="step-check" data-step="2" onchange="updateProgress()"><span>Observat&#246;r utsedd och placerad</span></label>
+            <input type="text" id="e2_namn" placeholder="Vem &#228;r observat&#246;r? (Namn/befattning)" style="margin-top:8px">
+            <input type="text" id="e2_position" placeholder="Observat&#246;rens position" style="margin-top:8px">
+        </div>
+
+        <!-- Steg 3 – B = Bevakningsomr&#229;de -->
+        <div class="form-group section-group step-card" id="step_3">
+            <div class="section-label">
+                <div class="section-letter step-letter" id="letter_3">B</div>
+                <div>
+                    <div class="section-title">Bevakningsomr&#229;de</div>
+                    <div class="section-subtitle">Gr&#228;nser och observationsriktning</div>
+                </div>
+                <div class="step-done-badge" id="badge_3" style="display:none;margin-left:auto;font-size:1.3rem;color:var(--accent)">&#10003;</div>
+            </div>
+            <label class="check-row"><input type="checkbox" class="step-check" data-step="3" onchange="updateProgress()"><span>Bevakningssektor fastst&#228;lld</span></label>
+            <textarea id="e3_bevak" rows="2" placeholder="Gr&#228;nser v&#228;nster/h&#246;ger och observationsriktning" style="margin-top:8px"></textarea>
+        </div>
+
+        <!-- Steg 4 – U = Utg&#229;ngspunkter -->
+        <div class="form-group section-group step-card" id="step_4">
+            <div class="section-label">
+                <div class="section-letter step-letter" id="letter_4">U</div>
+                <div>
+                    <div class="section-title">Utg&#229;ngspunkter</div>
+                    <div class="section-subtitle">UPK med riktning och avst&#229;nd</div>
+                </div>
+                <div class="step-done-badge" id="badge_4" style="display:none;margin-left:auto;font-size:1.3rem;color:var(--accent)">&#10003;</div>
+            </div>
+            <label class="check-row"><input type="checkbox" class="step-check" data-step="4" onchange="updateProgress()"><span>Utg&#229;ngspunkter upplagda</span></label>
+            <div id="upkLista" style="margin-top:8px"></div>
+            <button class="btn-add" onclick="addUpk()">+ L&#228;gg till UPK</button>
+        </div>
+
+        <!-- Steg 5 – S = Samband -->
+        <div class="form-group section-group step-card" id="step_5">
+            <div class="section-label">
+                <div class="section-letter step-letter" id="letter_5">S</div>
+                <div>
+                    <div class="section-title">Samband</div>
+                    <div class="section-subtitle">Kommunikation uppr&#228;ttad</div>
+                </div>
+                <div class="step-done-badge" id="badge_5" style="display:none;margin-left:auto;font-size:1.3rem;color:var(--accent)">&#10003;</div>
+            </div>
+            <label class="check-row"><input type="checkbox" class="step-check" data-step="5" onchange="updateProgress()"><span>Samband uppr&#228;ttat</span></label>
+            <input type="text" id="e5_kanal" placeholder="N&#228;t / Kanal / Anropssignal" style="margin-top:8px">
+        </div>
+
+        <!-- Steg 6 – A = Am- och skaderapport -->
+        <div class="form-group section-group step-card" id="step_6">
+            <div class="section-label">
+                <div class="section-letter step-letter" id="letter_6">A</div>
+                <div>
+                    <div class="section-title">Am- och skaderapport</div>
+                    <div class="section-subtitle">Ammunition och personal</div>
+                </div>
+                <div class="step-done-badge" id="badge_6" style="display:none;margin-left:auto;font-size:1.3rem;color:var(--accent)">&#10003;</div>
+            </div>
+            <label class="check-row"><input type="checkbox" class="step-check" data-step="6" onchange="updateProgress()"><span>Ammo- och skadestatus kontrollerad</span></label>
+            <input type="number" id="e6_ammo" placeholder="Ammo kvar %" inputmode="numeric" min="0" max="100" style="margin-top:8px">
+            <input type="number" id="e6_skadade" placeholder="Skadade (antal)" inputmode="numeric" min="0" style="margin-top:8px">
+            <textarea id="e6_ovrigt" rows="2" placeholder="&#214;vrigt (valfritt)" style="margin-top:8px"></textarea>
+        </div>
+
+        <!-- Steg 7 – R = Rapport till h&#246;gre chef -->
+        <div class="form-group section-group step-card" id="step_7">
+            <div class="section-label">
+                <div class="section-letter step-letter" id="letter_7">R</div>
+                <div>
+                    <div class="section-title">Rapport till h&#246;gre chef</div>
+                    <div class="section-subtitle">Statusrapport avgiven</div>
+                </div>
+                <div class="step-done-badge" id="badge_7" style="display:none;margin-left:auto;font-size:1.3rem;color:var(--accent)">&#10003;</div>
+            </div>
+            <label class="check-row"><input type="checkbox" class="step-check" data-step="7" onchange="updateProgress()"><span>Rapport avgiven</span></label>
+            <input type="text" id="e7_till" placeholder="Till vem rapporterades (anropssignal/befattning)" style="margin-top:8px">
+        </div>
+
+        <!-- Steg 8 – E = Eldst&#228;llningar – f&#246;rb&#228;ttra -->
+        <div class="form-group section-group step-card" id="step_8">
+            <div class="section-label">
+                <div class="section-letter step-letter" id="letter_8">E</div>
+                <div>
+                    <div class="section-title">Eldst&#228;llningar &#8211; f&#246;rb&#228;ttra</div>
+                    <div class="section-subtitle">Planerade f&#246;rb&#228;ttrings&#229;tg&#228;rder</div>
+                </div>
+                <div class="step-done-badge" id="badge_8" style="display:none;margin-left:auto;font-size:1.3rem;color:var(--accent)">&#10003;</div>
+            </div>
+            <label class="check-row"><input type="checkbox" class="step-check" data-step="8" onchange="updateProgress()"><span>F&#246;rb&#228;ttringsplan fastst&#228;lld</span></label>
+            <textarea id="e8_forbattra" rows="2" placeholder="Planerade f&#246;rb&#228;ttrings&#229;tg&#228;rder (gr&#228;vning, maskering, sidoskydd...)" style="margin-top:8px"></textarea>
+        </div>
+
+        <button class="btn btn-primary" onclick="generateStatuskvitto()">Generera statuskvitto</button>
+        <button class="btn btn-danger" onclick="borjaOm()">B&#246;rja om (ny eldst&#228;llning)</button>
+    </div>
+
+    <!-- Resultatvy -->
+    <div class="result-view" id="resultView">
+        <div class="result-header">Statuskvitto &#8211; EOBUSARE</div>
+        <div class="report-output" id="reportOutput"></div>
+        <button class="btn btn-copy" onclick="copyReport()">Kopiera till urklipp</button>
+        <div class="copy-feedback" id="copyFeedback">&#10003; Kopierat</div>
+        <div class="button-group">
+            <button class="btn btn-secondary" onclick="backToEdit()">Redigera</button>
+            <button class="btn btn-danger flex1" onclick="borjaOm()">B&#246;rja om</button>
+        </div>
+    </div>
+
+    </main>
+</div>
+
+<script>
+// ── Progress ─────────────────────────────────────────────────────────────────
+function updateProgress() {
+    const checks = document.querySelectorAll('.step-check');
+    const done = Array.from(checks).filter(c => c.checked).length;
+    const total = checks.length;
+    document.getElementById('progressBar').style.width = (done / total * 100) + '%';
+    document.getElementById('progressText').textContent = done + ' / ' + total + ' steg klara';
+
+    checks.forEach(function(c) {
+        const step = c.dataset.step;
+        const badge = document.getElementById('badge_' + step);
+        const card = document.getElementById('step_' + step);
+        if (c.checked) {
+            if (!card.classList.contains('done') && navigator.vibrate) navigator.vibrate(50);
+            badge.style.display = 'inline';
+            card.classList.add('done');
+        } else {
+            badge.style.display = 'none';
+            card.classList.remove('done');
+        }
+    });
+}
+
+function stepChecked(stepNr) {
+    const checks = document.querySelectorAll('.step-check');
+    for (let i = 0; i < checks.length; i++) {
+        if (checks[i].dataset.step == stepNr) return checks[i].checked;
+    }
+    return false;
+}
+
+// ── UPK-lista ────────────────────────────────────────────────────────────────
+function addUpk() {
+    const lista = document.getElementById('upkLista');
+    const row = document.createElement('div');
+    row.className = 'upk-row';
+
+    const inpNamn = document.createElement('input');
+    inpNamn.type = 'text'; inpNamn.className = 'inp-navn'; inpNamn.placeholder = 'UPK-namn';
+
+    const inpRiktn = document.createElement('input');
+    inpRiktn.type = 'text'; inpRiktn.className = 'inp-riktn'; inpRiktn.placeholder = 'Riktning';
+
+    const inpAvst = document.createElement('input');
+    inpAvst.type = 'text'; inpAvst.className = 'inp-avst'; inpAvst.placeholder = 'Avst (m)';
+
+    const btn = document.createElement('button');
+    btn.className = 'btn-remove-sm'; btn.textContent = '\u00d7'; btn.type = 'button';
+    btn.onclick = function() { lista.removeChild(row); };
+
+    row.appendChild(inpNamn);
+    row.appendChild(inpRiktn);
+    row.appendChild(inpAvst);
+    row.appendChild(btn);
+    lista.appendChild(row);
+    inpNamn.focus();
+}
+
+// ── Tid ──────────────────────────────────────────────────────────────────────
+function setNow() {
+    const now = new Date();
+    const p = function(n) { return String(n).padStart(2, '0'); };
+    document.getElementById('tnr').value = p(now.getDate()) + p(now.getHours()) + p(now.getMinutes());
+}
+
+
+// ── Hj&#228;lpfunktion f&#246;r att h&#228;mta f&#228;ltv&#228;rde ─────────────────────────────────────
+function v(id) {
+    const el = document.getElementById(id);
+    return el ? el.value.trim() : '';
+}
+
+// ── Generera statuskvitto ─────────────────────────────────────────────────────
+function generateStatuskvitto() {
+    const upkRader = Array.from(document.querySelectorAll('#upkLista .upk-row')).map(function(row, i) {
+        const inputs = row.querySelectorAll('input');
+        const namn = inputs[0].value.trim() || '?';
+        const riktn = inputs[1].value.trim() || '-';
+        const avst = inputs[2].value.trim() || '-';
+        return '  ' + (i+1) + '. ' + namn + ' (' + riktn + ', ' + avst + 'm)';
+    }).join('\n') || '  -';
+
+    const sambandStatus = stepChecked(5) ? 'Uppr\u00e4ttat' : 'Ej uppr\u00e4ttat';
+    const rapportStatus = stepChecked(7) ? 'Ja' : 'Nej';
+
+    const ammo = v('e6_ammo');
+    const skadade = v('e6_skadade');
+    const ovrigt = v('e6_ovrigt');
+
+    const lines = [
+        'STATUS: EOBUSARE \u2013 ELDST\u00c4LLNING INTAGEN',
+        'TNR: ' + (v('tnr') || '-'),
+        '',
+        'E \u2013 Eldst\u00e4llning: ' + (v('e1_position') || '-'),
+        'O \u2013 Observat\u00f6r: ' + (v('e2_namn') || '-') + ' vid ' + (v('e2_position') || '-'),
+        'B \u2013 Bevakningsomr\u00e5de: ' + (v('e3_bevak') || '-'),
+        'U \u2013 Utg\u00e5ngspunkter:\n' + upkRader,
+        'S \u2013 Samband: ' + (v('e5_kanal') || '-') + '  [' + sambandStatus + ']',
+        'A \u2013 Ammo: ' + (ammo ? ammo + '%' : '-') + '  |  Skadade: ' + (skadade || '-') + (ovrigt ? '\n   \u00d6vrigt: ' + ovrigt : ''),
+        'R \u2013 Rapport avgiven: ' + rapportStatus + ' till ' + (v('e7_till') || '-'),
+        'E \u2013 F\u00f6rb\u00e4ttra: ' + (v('e8_forbattra') || '-'),
+        '',
+        'KOM!'
+    ];
+
+    document.getElementById('reportOutput').textContent = lines.join('\n');
+    document.getElementById('formView').classList.add('hidden');
+    document.getElementById('resultView').classList.add('active');
+    window.scrollTo(0, 0);
+}
+
+// ── Kopiera ───────────────────────────────────────────────────────────────────
+function copyReport() {
+    const text = document.getElementById('reportOutput').textContent;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(showFeedback).catch(function() { fallbackCopy(text); });
+    } else {
+        fallbackCopy(text);
+    }
+}
+
+function fallbackCopy(text) {
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.cssText = 'position:fixed;opacity:0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); } catch(e) { alert('Kunde inte kopiera. Markera texten manuellt.'); }
+    document.body.removeChild(ta);
+    showFeedback();
+}
+
+function showFeedback() {
+    const el = document.getElementById('copyFeedback');
+    el.classList.remove('show');
+    void el.offsetWidth;
+    el.classList.add('show');
+}
+
+function backToEdit() {
+    document.getElementById('formView').classList.remove('hidden');
+    document.getElementById('resultView').classList.remove('active');
+}
+
+function borjaOm() {
+    if (!confirm('B\u00f6rja om med ny eldst\u00e4llning? All data rensas.')) return;
+
+    document.querySelectorAll('.step-check').forEach(function(c) { c.checked = false; });
+
+    ['tnr','e1_position','e2_namn','e2_position','e3_bevak',
+     'e5_kanal','e6_ammo','e6_skadade','e6_ovrigt','e7_till','e8_forbattra'].forEach(function(id) {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+    });
+
+    document.getElementById('upkLista').innerHTML = '';
+
+    document.querySelectorAll('.step-done-badge').forEach(function(b) { b.style.display = 'none'; });
+    document.querySelectorAll('.step-card').forEach(function(c) { c.classList.remove('done'); });
+
+    updateProgress();
+    setNow();
+    backToEdit();
+    window.scrollTo(0, 0);
+}
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+    setNow();
+    updateProgress();
+});
+
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('service-worker.js');
+
+// ── Feedback-länk ──────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+    const a = document.createElement('a');
+    a.href = 'https://github.com/gitjoda71/faltrapport/issues/new?title=%5BBeta-Feedback%5D%20EOBUSARE&body=**Form%3A**%20EOBUSARE%0A%0A**Beskriv%20problemet%2Ff%C3%B6rslaget%3A**%0A%0A**Telefon%3A**';
+    a.target = '_blank'; a.rel = 'noopener noreferrer';
+    a.textContent = 'Bugg eller förslag? Lämna feedback →';
+    a.style.cssText = 'display:block;text-align:center;padding:24px 0 12px;font-size:0.7rem;color:#5a7a5a;text-decoration:none';
+    const c = document.querySelector('.container');
+    if (c) c.appendChild(a);
+});
+</script>
+</body>
+</html>

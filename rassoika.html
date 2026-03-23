@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0d1f0d">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="RASSOIKA">
+    <title>RASSOIKA – Patrullchef</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary:#0d1f0d;--bg-secondary:#152815;--bg-card:#1a321a;--bg-input:#0f240f;
+            --border:#2d4a2d;--border-focus:#4a7c4a;--text-primary:#e8f0e8;--text-secondary:#8aaa8a;
+            --text-muted:#5a7a5a;--accent:#4caf50;--accent-hover:#66bb6a;--accent-dim:#1e3d1e;
+            --danger:#c62828;--danger-hover:#e53935;--info:#1565c0;--info-hover:#1976d2;
+            --radius:8px;--radius-sm:4px;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg-primary); color: var(--text-primary); min-height: 100vh; padding: 16px; }
+        .container { max-width: 560px; margin: 0 auto; }
+
+        .topbar { display: flex; align-items: center; gap: 12px; padding: 12px 0 16px; }
+        .back-btn { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: var(--radius-sm); background: var(--bg-secondary); border: 1px solid var(--border); color: var(--text-secondary); text-decoration: none; font-size: 1.1rem; flex-shrink: 0; transition: background 0.15s, color 0.15s; }
+        .back-btn:hover { background: var(--bg-card); color: var(--text-primary); }
+        .topbar-title h1 { font-size: 1.4rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); }
+        .topbar-title p { font-size: 0.72rem; color: var(--text-muted); letter-spacing: 0.06em; margin-top: 2px; }
+
+        .tab-nav { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px; margin-bottom: 16px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius); padding: 4px; }
+        .tab-link { text-align: center; padding: 8px 2px; border-radius: var(--radius-sm); color: var(--text-muted); text-decoration: none; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.04em; transition: background 0.15s, color 0.15s; -webkit-tap-highlight-color: transparent; }
+        .tab-link:hover { background: var(--bg-card); color: var(--text-secondary); }
+        .tab-link.active { background: var(--accent-dim); color: var(--accent); }
+
+        .progress-bar-wrap { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 20px; height: 10px; margin-bottom: 6px; overflow: hidden; }
+        .progress-bar-inner { background: var(--accent); height: 100%; border-radius: 20px; transition: width .3s; }
+        .progress-text { text-align: center; font-size: .75rem; color: var(--text-muted); margin-bottom: 14px; }
+
+        .form-group { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 10px; }
+        .form-group.section-group { border-left: 3px solid var(--accent); }
+
+        .section-letter { width: 32px; height: 32px; border-radius: 50%; background: var(--accent-dim); border: 1px solid var(--accent); color: var(--accent); font-size: 1rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .section-title { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-secondary); }
+        .section-subtitle { font-size: 0.68rem; color: var(--text-muted); margin-top: 1px; }
+
+        label { font-weight: 600; font-size: 0.82rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-secondary); display: block; margin-bottom: 6px; }
+        .sub-label { font-weight: 600; font-size: 0.78rem; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-secondary); display: block; margin-top: 14px; margin-bottom: 6px; }
+
+        input[type="text"], input[type="datetime-local"], textarea, select {
+            width: 100%; background: var(--bg-input); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-primary); font-family: inherit; font-size: 1rem; padding: 12px 14px; outline: none; transition: border-color 0.15s; -webkit-appearance: none; appearance: none;
+        }
+        input[type="text"]:focus, input[type="datetime-local"]:focus, textarea:focus, select:focus { border-color: var(--border-focus); }
+        input[type="datetime-local"] { color-scheme: dark; }
+        textarea { resize: vertical; min-height: 72px; line-height: 1.5; }
+        select { cursor: pointer; }
+        select option { background: var(--bg-card); }
+
+        .input-row { display: flex; gap: 8px; align-items: flex-start; }
+        .input-row input { flex: 1; min-width: 0; }
+
+        .input-col2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+        .saved-items { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+        .saved-item { display: inline-flex; align-items: center; gap: 4px; background: var(--accent-dim); color: var(--text-secondary); font-size: 0.78rem; padding: 4px 8px; border-radius: 20px; cursor: pointer; transition: background 0.15s; }
+        .saved-item:hover { background: var(--border-focus); color: var(--text-primary); }
+        .saved-item .del { color: var(--text-muted); font-size: 1rem; line-height: 1; padding: 0 2px; }
+        .saved-item .del:hover { color: var(--danger-hover); }
+
+        /* Accordion steg */
+        .step-details { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 8px; overflow: hidden; }
+        .step-details.done { border-left: 3px solid var(--accent); }
+        .step-summary { display: flex; align-items: center; gap: 10px; padding: 14px 16px; cursor: pointer; list-style: none; -webkit-tap-highlight-color: transparent; }
+        .step-summary::-webkit-details-marker { display: none; }
+        .step-summary:hover { background: var(--bg-secondary); }
+        .step-content { padding: 0 16px 14px; }
+        .step-badge { font-size: 1.3rem; margin-left: auto; flex-shrink: 0; }
+        .step-letter { width: 32px; height: 32px; border-radius: 50%; background: var(--accent-dim); border: 1px solid var(--accent); color: var(--accent); font-size: 1rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+        .check-row { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; cursor: pointer; font-size: .95rem; color: var(--text-primary); line-height: 1.4; }
+        .check-row input[type=checkbox] { width: 22px; height: 22px; min-width: 22px; accent-color: var(--accent); margin-top: 2px; cursor: pointer; }
+
+        .dyn-card { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; margin-bottom: 6px; display: flex; gap: 8px; align-items: flex-start; }
+        .dyn-card input, .dyn-card select { flex: 1; min-width: 0; }
+        .dyn-card select { min-width: 120px; flex: 0 0 auto; }
+
+        .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 12px 20px; border: none; border-radius: var(--radius); font-family: inherit; font-size: 0.95rem; font-weight: 600; letter-spacing: 0.04em; cursor: pointer; transition: background 0.15s, transform 0.1s; -webkit-tap-highlight-color: transparent; }
+        .btn:active { transform: scale(0.97); }
+        .btn-primary { width: 100%; background: var(--accent); color: #fff; margin-top: 8px; font-size: 1rem; border: none; }
+        .btn-primary:hover { background: var(--accent-hover); }
+        .btn-sm { min-height: 40px; padding: 8px 14px; border-radius: var(--radius-sm); font-size: 0.85rem; white-space: nowrap; flex-shrink: 0; }
+        .btn-time { background: var(--accent-dim); color: var(--accent); border: none; }
+        .btn-time:hover { background: var(--border-focus); }
+        .btn-copy { width: 100%; background: var(--info); color: #fff; margin-bottom: 12px; border: none; }
+        .btn-copy:hover { background: var(--info-hover); }
+        .btn-secondary { flex: 1; background: var(--bg-secondary); color: var(--text-secondary); border: 1px solid var(--border); }
+        .btn-secondary:hover { background: var(--bg-card); color: var(--text-primary); }
+        .btn-danger { width: 100%; background: var(--danger); color: #fff; border: none; margin-top: 8px; }
+        .btn-danger:hover { background: var(--danger-hover); }
+        .btn-danger.flex1 { flex: 1; margin-top: 0; }
+        .btn-add { background: var(--accent-dim); color: var(--accent); border: 1px dashed var(--accent); border-radius: var(--radius-sm); padding: 8px 14px; font-size: 0.82rem; font-weight: 600; cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; transition: background 0.15s; }
+        .btn-add:hover { background: var(--border-focus); }
+        .btn-remove-sm { background: none; border: none; color: var(--text-muted); font-size: 1rem; cursor: pointer; padding: 4px 8px; border-radius: var(--radius-sm); flex-shrink: 0; transition: color 0.15s; min-height: 36px; }
+        .btn-remove-sm:hover { color: var(--danger-hover); }
+        .button-group { display: flex; gap: 10px; }
+
+        .result-view { display: none; }
+        .result-view.active { display: block; }
+        .form-view.hidden { display: none; }
+        .result-header { font-size: 0.8rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); text-align: center; margin-bottom: 12px; }
+        .report-output { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; font-family: 'Courier New', monospace; font-size: 0.92rem; line-height: 1.9; white-space: pre-wrap; color: var(--text-primary); margin-bottom: 14px; }
+        .copy-feedback { text-align: center; color: var(--accent); font-size: 0.85rem; font-weight: 600; height: 24px; opacity: 0; transition: opacity 0.2s; margin-bottom: 12px; }
+        .copy-feedback.show { opacity: 1; }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <div class="topbar">
+        <a href="index.html" class="back-btn">&#8592;</a>
+        <div class="topbar-title">
+            <h1>R.A.S.S.O.I.K.A</h1>
+            <p>Patrullchef f&ouml;re utg&aring;ende</p>
+        </div>
+    </div>
+
+    <nav class="tab-nav">
+        <a href="obslosa.html" class="tab-link">OBSL&Ouml;SA</a>
+        <a href="fors.html" class="tab-link">FORS</a>
+        <a href="pedars.html" class="tab-link">PEDARS</a>
+        <a href="postschema.html" class="tab-link">SCHEMA</a>
+        <a href="eobusare.html" class="tab-link">EOBUSARE</a>
+        <a href="obo.html" class="tab-link">OBO</a>
+        <a href="rassoika.html" class="tab-link active">RASSOIKA</a>
+    </nav>
+
+    <!-- FORM VIEW -->
+    <div class="form-view" id="formView">
+
+        <div class="progress-bar-wrap">
+            <div class="progress-bar-inner" id="progressBar" style="width:0%"></div>
+        </div>
+        <div class="progress-text" id="progressText">0 / 8 steg klara</div>
+
+        <!-- TNR -->
+        <div class="form-group">
+            <label for="tnr">TNR</label>
+            <div class="input-row" style="margin-top:6px">
+                <input type="text" id="tnr" placeholder="DDHHMM" inputmode="numeric" maxlength="6" autocomplete="off">
+                <button class="btn btn-sm btn-time" onclick="setNow()">Nu</button>
+            </div>
+            <div style="font-size:.72rem;color:var(--text-muted);margin-top:5px">Format: DDHHMM (dag–timme–minut, t.ex. 231430)</div>
+        </div>
+
+        <!-- STEG 1 – R = Repetera uppgiften -->
+        <details class="step-details" id="step_1" open>
+            <summary class="step-summary">
+                <span class="step-letter">R</span>
+                <div style="flex:1">
+                    <div class="section-title">Repetera uppgiften</div>
+                    <div class="section-subtitle">Vad ska patrullen uppn&aring;?</div>
+                </div>
+                <span class="step-badge" id="badge_1">&#x2B1C;</span>
+            </summary>
+            <div class="step-content">
+                <label class="check-row">
+                    <input type="checkbox" id="r_rep" onchange="updateProgress()">
+                    <span>Uppgift repeterad</span>
+                </label>
+                <label for="r_uppgift" style="margin-top:8px">Uppgiftens k&auml;rna</label>
+                <textarea id="r_uppgift" placeholder="Uppgiftens k&auml;rna &mdash; fiende, mineringar, egna f&ouml;rband, terr&auml;ng, v&auml;der, in/utpassering, l&ouml;sen, rapportering..."></textarea>
+                <label for="r_plan" style="margin-top:10px">Plan f&ouml;r l&ouml;sning</label>
+                <textarea id="r_plan" placeholder="Plan f&ouml;r hur patrullen l&ouml;ser uppgiften..."></textarea>
+            </div>
+        </details>
+
+        <!-- STEG 2 – A = Avdela personal -->
+        <details class="step-details" id="step_2">
+            <summary class="step-summary">
+                <span class="step-letter">A</span>
+                <div style="flex:1">
+                    <div class="section-title">Avdela personal</div>
+                    <div class="section-subtitle">Roller och sammansättning</div>
+                </div>
+                <span class="step-badge" id="badge_2">&#x2B1C;</span>
+            </summary>
+            <div class="step-content">
+                <label class="check-row">
+                    <input type="checkbox" id="a_stf_check" onchange="updateProgress()">
+                    <span>St&auml;llf&ouml;retr&auml;dande chef utsedd</span>
+                </label>
+                <label for="a_stf_namn" style="margin-top:8px">Stf:s namn</label>
+                <input type="text" id="a_stf_namn" placeholder="Stf:s namn">
+
+                <span class="sub-label">Patrullens sammansättning</span>
+                <div id="patrullLista"></div>
+                <button class="btn-add" onclick="addPatrull()">+ L&auml;gg till patrullmedlem</button>
+            </div>
+        </details>
+
+        <!-- STEG 3 – S = Samla patrullen -->
+        <details class="step-details" id="step_3">
+            <summary class="step-summary">
+                <span class="step-letter">S</span>
+                <div style="flex:1">
+                    <div class="section-title">Samla patrullen</div>
+                    <div class="section-subtitle">Gemensam samling och planering</div>
+                </div>
+                <span class="step-badge" id="badge_3">&#x2B1C;</span>
+            </summary>
+            <div class="step-content">
+                <label class="check-row">
+                    <input type="checkbox" id="s1_samlad" onchange="updateProgress()">
+                    <span>Patrull samlad p&aring; skyddad plats</span>
+                </label>
+                <label for="s1_plats" style="margin-top:8px">Samlingsplats</label>
+                <input type="text" id="s1_plats" placeholder="Samlingsplats">
+                <label class="check-row" style="margin-top:8px">
+                    <input type="checkbox" id="s1_plan" onchange="updateProgress()">
+                    <span>Kompletterande planering genomf&ouml;rd gemensamt</span>
+                </label>
+            </div>
+        </details>
+
+        <!-- STEG 4 – S = Stridsberedskap -->
+        <details class="step-details" id="step_4">
+            <summary class="step-summary">
+                <span class="step-letter">S</span>
+                <div style="flex:1">
+                    <div class="section-title">Stridsberedskap</div>
+                    <div class="section-subtitle">Materiel och maskering</div>
+                </div>
+                <span class="step-badge" id="badge_4">&#x2B1C;</span>
+            </summary>
+            <div class="step-content">
+                <label class="check-row"><input type="checkbox" id="ss_ammo" onchange="updateProgress()"><span>Ammunition iordningstä&auml;lld</span></label>
+                <label class="check-row"><input type="checkbox" id="ss_extra_ammo" onchange="updateProgress()"><span>Extra am (pskott, handgranater etc.)</span></label>
+                <label class="check-row"><input type="checkbox" id="ss_radio" onchange="updateProgress()"><span>Radioapparat klar</span></label>
+                <label class="check-row"><input type="checkbox" id="ss_kik" onchange="updateProgress()"><span>Bildförstärkare/kikare</span></label>
+                <label class="check-row"><input type="checkbox" id="ss_signal" onchange="updateProgress()"><span>Signalpistol</span></label>
+                <label class="check-row"><input type="checkbox" id="ss_mat" onchange="updateProgress()"><span>Livsmedel</span></label>
+                <label class="check-row"><input type="checkbox" id="ss_sjv" onchange="updateProgress()"><span>Sjukv&aring;rdsmateriel</span></label>
+                <label class="check-row"><input type="checkbox" id="ss_sprg" onchange="updateProgress()"><span>Sprängmedel (vid behov)</span></label>
+                <label class="check-row"><input type="checkbox" id="ss_mask_ans" onchange="updateProgress()"><span>Maskering &mdash; ansikte</span></label>
+                <label class="check-row"><input type="checkbox" id="ss_mask_hand" onchange="updateProgress()"><span>Maskering &mdash; händer</span></label>
+                <label class="check-row"><input type="checkbox" id="ss_mask_unif" onchange="updateProgress()"><span>Maskering &mdash; uniform/utrustning</span></label>
+                <label class="check-row"><input type="checkbox" id="ss_mark" onchange="updateProgress()"><span>Märkning f&ouml;r igenkänning (band/tejp)</span></label>
+                <label class="check-row"><input type="checkbox" id="ss_dok" onchange="updateProgress()"><span>Sekretesshandlingar kvarlämnade/f&ouml;rst&ouml;rda</span></label>
+                <label for="ss_ovrigt" style="margin-top:10px">&Ouml;vrigt materiel</label>
+                <textarea id="ss_ovrigt" rows="2" placeholder="&Ouml;vrigt materiel..."></textarea>
+            </div>
+        </details>
+
+        <!-- STEG 5 – O = Orientera patrullen -->
+        <details class="step-details" id="step_5">
+            <summary class="step-summary">
+                <span class="step-letter">O</span>
+                <div style="flex:1">
+                    <div class="section-title">Orientera patrullen</div>
+                    <div class="section-subtitle">Lägesunderrättelse och plandetaljer</div>
+                </div>
+                <span class="step-badge" id="badge_5">&#x2B1C;</span>
+            </summary>
+            <div class="step-content">
+                <label class="check-row">
+                    <input type="checkbox" id="o_genomford" onchange="updateProgress()">
+                    <span>Orientering genomf&ouml;rd</span>
+                </label>
+                <label for="o_fiende" style="margin-top:8px">Fienden</label>
+                <textarea id="o_fiende" placeholder="Fienden..."></textarea>
+                <label for="o_egna" style="margin-top:10px">Egna f&ouml;rband</label>
+                <textarea id="o_egna" placeholder="Egna f&ouml;rband..."></textarea>
+                <label for="o_uppgift" style="margin-top:10px">Uppgiften och l&ouml;sningsid&eacute;n</label>
+                <textarea id="o_uppgift" placeholder="Uppgiften och l&ouml;sningsid&eacute;n..."></textarea>
+                <label for="o_inpass" style="margin-top:10px">In- och utpassering</label>
+                <textarea id="o_inpass" placeholder="In- och utpassering..."></textarea>
+                <span class="sub-label">L&ouml;sen</span>
+                <div class="input-col2">
+                    <input type="text" id="o_los1" placeholder="L&ouml;sen Ord 1">
+                    <input type="text" id="o_los2" placeholder="Ord 2">
+                </div>
+                <label for="o_samb_tecken" style="margin-top:10px">Egna tecken f&ouml;r internt samband</label>
+                <textarea id="o_samb_tecken" placeholder="Egna tecken f&ouml;r internt samband..."></textarea>
+                <label for="o_atersaml" style="margin-top:10px">&Aring;tersamlingsplatser</label>
+                <textarea id="o_atersaml" placeholder="&Aring;tersamlingsplatser om patrullen skingras..."></textarea>
+                <label for="o_visat" style="margin-top:10px">Orientering visad p&aring;</label>
+                <select id="o_visat" onchange="updateProgress()">
+                    <option value="Karta">Karta</option>
+                    <option value="Terr&auml;ngskiss">Terr&auml;ngskiss</option>
+                    <option value="I terr&auml;ngen">I terr&auml;ngen</option>
+                </select>
+            </div>
+        </details>
+
+        <!-- STEG 6 – I = Indela patrullen -->
+        <details class="step-details" id="step_6">
+            <summary class="step-summary">
+                <span class="step-letter">I</span>
+                <div style="flex:1">
+                    <div class="section-title">Indela patrullen</div>
+                    <div class="section-subtitle">Vem g&ouml;r vad och bevakar vad</div>
+                </div>
+                <span class="step-badge" id="badge_6">&#x2B1C;</span>
+            </summary>
+            <div class="step-content">
+                <div id="indelaLista"></div>
+                <button class="btn-add" onclick="addIndela()">+ L&auml;gg till indelning</button>
+                <label for="i_uppsikt" style="margin-top:12px">Uppsikt</label>
+                <textarea id="i_uppsikt" placeholder="Vem h&aring;ller uppsikt &aring;t sidor / bak&aring;t / upp&aring;t..."></textarea>
+            </div>
+        </details>
+
+        <!-- STEG 7 – K = Kontrollera -->
+        <details class="step-details" id="step_7">
+            <summary class="step-summary">
+                <span class="step-letter">K</span>
+                <div style="flex:1">
+                    <div class="section-title">Kontrollera</div>
+                    <div class="section-subtitle">Verifiering av kunskap och utrustning</div>
+                </div>
+                <span class="step-badge" id="badge_7">&#x2B1C;</span>
+            </summary>
+            <div class="step-content">
+                <label class="check-row">
+                    <input type="checkbox" id="k_uppgift" onchange="updateProgress()">
+                    <span>Alla vet sin uppgift (verifierat via fr&aring;gor)</span>
+                </label>
+                <label class="check-row">
+                    <input type="checkbox" id="k_utr" onchange="updateProgress()">
+                    <span>Utrustning s&auml;ker &mdash; skramlar ej, inga reflexer</span>
+                </label>
+                <label class="check-row">
+                    <input type="checkbox" id="k_dok" onchange="updateProgress()">
+                    <span>Sekretesshandlingar kvarlämnade/f&ouml;rst&ouml;rda</span>
+                </label>
+                <label class="check-row">
+                    <input type="checkbox" id="k_ovn" onchange="updateProgress()">
+                    <span>&Ouml;vning av moment genomf&ouml;rd (vid tid/behov)</span>
+                </label>
+                <label for="k_noter" style="margin-top:8px">Noteringar fr&aring;n kontrollen</label>
+                <textarea id="k_noter" rows="2" placeholder="Noteringar fr&aring;n kontrollen..."></textarea>
+            </div>
+        </details>
+
+        <!-- STEG 8 – A = Anmäl klar till chef -->
+        <details class="step-details" id="step_8">
+            <summary class="step-summary">
+                <span class="step-letter">A</span>
+                <div style="flex:1">
+                    <div class="section-title">Anmäl klar till chef</div>
+                    <div class="section-subtitle">Patrullen redo att utg&aring;</div>
+                </div>
+                <span class="step-badge" id="badge_8">&#x2B1C;</span>
+            </summary>
+            <div class="step-content">
+                <label class="check-row">
+                    <input type="checkbox" id="an_anmalt" onchange="updateProgress()">
+                    <span>Anmält att patrullen &auml;r klar att utg&aring;</span>
+                </label>
+                <label for="an_till" style="margin-top:8px">Till vem anmäldes</label>
+                <input type="text" id="an_till" placeholder="Till vem anmäldes (anropssignal/befattning)">
+                <label for="an_stund" style="margin-top:10px">Utgångstid (TNR):</label>
+                <div class="input-row" style="margin-top:6px">
+                    <input type="text" id="an_stund" placeholder="DDHHMM" inputmode="numeric" maxlength="6" autocomplete="off">
+                    <button class="btn btn-sm btn-time" id="anNuBtn" onclick="setAnNow()">Nu</button>
+                </div>
+            </div>
+        </details>
+
+        <button class="btn btn-primary" onclick="generateReport()">Generera statuskvitto</button>
+
+    </div><!-- /form-view -->
+
+    <!-- RESULT VIEW -->
+    <div class="result-view" id="resultView">
+        <div class="result-header">Statuskvitto genererat</div>
+        <button class="btn btn-copy" onclick="copyReport()">Kopiera text</button>
+        <div class="copy-feedback" id="copyFeedback">Kopierat!</div>
+        <pre class="report-output" id="reportOutput"></pre>
+        <div class="button-group">
+            <button class="btn btn-secondary" onclick="goBack()">&#8592; &Auml;ndra</button>
+            <button class="btn btn-danger flex1" onclick="clearAll()">&Rensa allt</button>
+        </div>
+        <div style="height:24px"></div>
+    </div>
+
+</div><!-- /container -->
+
+<script>
+// ============================================================
+// UTILITY
+// ============================================================
+function v(id) {
+    const el = document.getElementById(id);
+    if (!el) return '';
+    return el.value.trim();
+}
+
+function lsGet(key) {
+    try { return JSON.parse(localStorage.getItem(key)) || null; } catch(e) { return null; }
+}
+
+function lsSet(key, val) {
+    try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {}
+}
+
+function setNow() {
+    const now = new Date();
+    const p = n => String(n).padStart(2, '0');
+    document.getElementById('tnr').value = p(now.getDate()) + p(now.getHours()) + p(now.getMinutes());
+}
+
+function setAnNow() {
+    const now = new Date();
+    const p = n => String(n).padStart(2, '0');
+    document.getElementById('an_stund').value = p(now.getDate()) + p(now.getHours()) + p(now.getMinutes());
+}
+
+// ============================================================
+// DYNAMISK PATRULLE-LISTA
+// ============================================================
+let patrullCount = 0;
+const ROLLER = ['Patrullchef','Spjutspets','Orienterare','Rapportkarl','Spejare','Signalist','Sidoobservatör','Bakre observatör','Övrig'];
+
+function addPatrull() {
+    patrullCount++;
+    const lista = document.getElementById('patrullLista');
+    const card = document.createElement('div');
+    card.className = 'dyn-card';
+    card.id = 'patrullCard_' + patrullCount;
+    const rollerOptions = ROLLER.map(r => `<option value="${r}">${r}</option>`).join('');
+    card.innerHTML = `
+        <input type="text" placeholder="Namn/befattning">
+        <select>${rollerOptions}</select>
+        <button class="btn-remove-sm" onclick="removeCard('patrullCard_${patrullCount}')" title="Ta bort">&#10005;</button>
+    `;
+    lista.appendChild(card);
+    updateProgress();
+}
+
+// ============================================================
+// DYNAMISK INDELA-LISTA
+// ============================================================
+let indelaCount = 0;
+
+function addIndela() {
+    indelaCount++;
+    const lista = document.getElementById('indelaLista');
+    const card = document.createElement('div');
+    card.className = 'dyn-card';
+    card.id = 'indelaCard_' + indelaCount;
+    card.innerHTML = `
+        <input type="text" placeholder="Person">
+        <input type="text" placeholder="Uppgift/sektor">
+        <button class="btn-remove-sm" onclick="removeIndela('indelaCard_${indelaCount}')" title="Ta bort">&#10005;</button>
+    `;
+    lista.appendChild(card);
+    updateProgress();
+}
+
+function removeCard(id) {
+    const el = document.getElementById(id);
+    if (el) el.remove();
+    updateProgress();
+}
+
+function removeIndela(id) {
+    const el = document.getElementById(id);
+    if (el) el.remove();
+    updateProgress();
+}
+
+// ============================================================
+// PROGRESS
+// ============================================================
+function updateProgress() {
+    const ss_ids = ['ss_ammo','ss_extra_ammo','ss_radio','ss_kik','ss_signal','ss_mat','ss_sjv','ss_sprg','ss_mask_ans','ss_mask_hand','ss_mask_unif','ss_mark','ss_dok'];
+
+    const steg = [
+        document.getElementById('r_rep')?.checked,
+        document.getElementById('a_stf_check')?.checked,
+        document.getElementById('s1_samlad')?.checked,
+        ss_ids.every(id => document.getElementById(id)?.checked),
+        document.getElementById('o_genomford')?.checked,
+        (document.getElementById('indelaLista')?.children.length || 0) > 0,
+        document.getElementById('k_uppgift')?.checked && document.getElementById('k_utr')?.checked,
+        document.getElementById('an_anmalt')?.checked,
+    ];
+
+    const done = steg.filter(Boolean).length;
+    document.getElementById('progressBar').style.width = (done / 8 * 100) + '%';
+    document.getElementById('progressText').textContent = `${done} / 8 steg klara`;
+
+    steg.forEach((ok, i) => {
+        const badge = document.getElementById(`badge_${i + 1}`);
+        const detail = document.getElementById(`step_${i + 1}`);
+        if (badge) badge.textContent = ok ? '\u2705' : '\u2B1C';
+        if (detail) {
+            if (ok) detail.classList.add('done');
+            else detail.classList.remove('done');
+        }
+    });
+}
+
+// ============================================================
+// GENERERA RAPPORT
+// ============================================================
+function generateReport() {
+    // Patrullens sammansättning
+    const patrullMedl = Array.from(document.getElementById('patrullLista').children).map(c => {
+        const inp = c.querySelector('input');
+        const sel = c.querySelector('select');
+        return inp?.value.trim() ? `${inp.value.trim()} (${sel?.value || ''})` : null;
+    }).filter(Boolean);
+
+    const lines = [
+        'KVITTO: PATRULL UTG\u00c5ENDE',
+        `TNR:           ${v('tnr') || '-'}`,
+        `Utg\u00e5ngstid:    ${v('an_stund') || '-'}`,
+        `Styrka:        ${patrullMedl.length || '?'} pers`,
+        '',
+        'Sammansättning:',
+    ];
+    patrullMedl.forEach(m => lines.push(`  ${m}`));
+    if (v('a_stf_namn')) lines.push(`Stf: ${v('a_stf_namn')}`);
+    lines.push('');
+
+    // Lösen
+    if (v('o_los1') || v('o_los2')) lines.push(`L\u00f6sen: ${v('o_los1').toUpperCase() || '?'} \u2013 ${v('o_los2').toUpperCase() || '?'}`);
+    if (v('an_till')) lines.push(`Anm\u00e4lt till: ${v('an_till')}`);
+    lines.push('');
+
+    // Stegstatus
+    const stegNamn = ['R-Repetera', 'A-Avdela', 'S-Samla', 'S-Stridsberedskap', 'O-Orientera', 'I-Indela', 'K-Kontrollera', 'A-Anm\u00e4l'];
+    const stegStatus = [
+        document.getElementById('r_rep')?.checked,
+        document.getElementById('a_stf_check')?.checked,
+        document.getElementById('s1_samlad')?.checked,
+        document.getElementById('ss_ammo')?.checked,
+        document.getElementById('o_genomford')?.checked,
+        (document.getElementById('indelaLista')?.children.length || 0) > 0,
+        document.getElementById('k_uppgift')?.checked,
+        document.getElementById('an_anmalt')?.checked,
+    ];
+    lines.push('Stegstatus:');
+    stegNamn.forEach((n, i) => lines.push(`  ${stegStatus[i] ? '\u2713' : '\u2717'} ${n}`));
+
+    document.getElementById('reportOutput').textContent = lines.join('\n');
+    document.getElementById('formView').classList.add('hidden');
+    document.getElementById('resultView').classList.add('active');
+    window.scrollTo(0, 0);
+}
+
+// ============================================================
+// COPY / BACK / CLEAR
+// ============================================================
+function copyReport() {
+    const text = document.getElementById('reportOutput').textContent;
+    navigator.clipboard.writeText(text).then(() => {
+        const fb = document.getElementById('copyFeedback');
+        fb.classList.add('show');
+        setTimeout(() => fb.classList.remove('show'), 2000);
+    });
+}
+
+function goBack() {
+    document.getElementById('formView').classList.remove('hidden');
+    document.getElementById('resultView').classList.remove('active');
+    window.scrollTo(0, 0);
+}
+
+function clearAll() {
+    if (!confirm('Rensa alla f\u00e4lt och b\u00f6rja om?')) return;
+    document.getElementById('patrullLista').innerHTML = '';
+    document.getElementById('indelaLista').innerHTML = '';
+    patrullCount = 0;
+    indelaCount = 0;
+    document.querySelectorAll('input[type="text"], textarea').forEach(el => el.value = '');
+    document.querySelectorAll('input[type="checkbox"]').forEach(el => el.checked = false);
+    goBack();
+    setNow();
+    updateProgress();
+    for (let i = 0; i < 4; i++) addPatrull();
+    addIndela(); addIndela();
+}
+
+// ============================================================
+// INIT
+// ============================================================
+document.addEventListener('DOMContentLoaded', function() {
+    setNow();
+    for (let i = 0; i < 4; i++) addPatrull();
+    addIndela();
+    addIndela();
+    updateProgress();
+});
+
+// ============================================================
+// WAKE LOCK – håller skärmen på vid kvittovisning
+// ============================================================
+let wakeLock = null;
+async function requestWakeLock() {
+    if ('wakeLock' in navigator) {
+        try { wakeLock = await navigator.wakeLock.request('screen'); } catch(_) {}
+    }
+}
+function releaseWakeLock() {
+    if (wakeLock) { wakeLock.release().catch(()=>{}); wakeLock = null; }
+}
+const _origGenerateReport = generateReport;
+generateReport = function() { _origGenerateReport(); requestWakeLock(); };
+const _origGoBack = goBack;
+goBack = function() { releaseWakeLock(); _origGoBack(); };
+
+// ============================================================
+// SERVICE WORKER
+// ============================================================
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('service-worker.js');
+}
+
+// ── Feedback-länk ──────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+    const a = document.createElement('a');
+    a.href = 'https://github.com/gitjoda71/faltrapport/issues/new?title=%5BBeta-Feedback%5D%20RASSOIKA&body=**Form%3A**%20RASSOIKA%0A%0A**Beskriv%20problemet%2Ff%C3%B6rslaget%3A**%0A%0A**Telefon%3A**';
+    a.target = '_blank'; a.rel = 'noopener noreferrer';
+    a.textContent = 'Bugg eller förslag? Lämna feedback →';
+    a.style.cssText = 'display:block;text-align:center;padding:24px 0 12px;font-size:0.7rem;color:#5a7a5a;text-decoration:none';
+    const c = document.querySelector('.container');
+    if (c) c.appendChild(a);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0d1f0d">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="OBO">
+    <title>OBO – Ordergivning</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary:#0d1f0d;--bg-secondary:#152815;--bg-card:#1a321a;--bg-input:#0f240f;
+            --border:#2d4a2d;--border-focus:#4a7c4a;--text-primary:#e8f0e8;--text-secondary:#8aaa8a;
+            --text-muted:#5a7a5a;--accent:#4caf50;--accent-hover:#66bb6a;--accent-dim:#1e3d1e;
+            --danger:#c62828;--danger-hover:#e53935;--info:#1565c0;--info-hover:#1976d2;
+            --radius:8px;--radius-sm:4px;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg-primary); color: var(--text-primary); min-height: 100vh; padding: 16px; }
+        .container { max-width: 560px; margin: 0 auto; }
+
+        .topbar { display: flex; align-items: center; gap: 12px; padding: 12px 0 16px; }
+        .back-btn { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: var(--radius-sm); background: var(--bg-secondary); border: 1px solid var(--border); color: var(--text-secondary); text-decoration: none; font-size: 1.1rem; flex-shrink: 0; transition: background 0.15s, color 0.15s; }
+        .back-btn:hover { background: var(--bg-card); color: var(--text-primary); }
+        .topbar-title h1 { font-size: 1.4rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); }
+        .topbar-title p { font-size: 0.72rem; color: var(--text-muted); letter-spacing: 0.06em; margin-top: 2px; }
+
+        .tab-nav { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px; margin-bottom: 16px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius); padding: 4px; }
+        .tab-link { text-align: center; padding: 8px 2px; border-radius: var(--radius-sm); color: var(--text-muted); text-decoration: none; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.04em; transition: background 0.15s, color 0.15s; -webkit-tap-highlight-color: transparent; }
+        .tab-link:hover { background: var(--bg-card); color: var(--text-secondary); }
+        .tab-link.active { background: var(--accent-dim); color: var(--accent); }
+
+        .form-group { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 10px; }
+        .form-group.section-group { border-left: 3px solid var(--accent); }
+
+        .section-label { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .section-letter { width: 32px; height: 32px; border-radius: 50%; background: var(--accent-dim); border: 1px solid var(--accent); color: var(--accent); font-size: 1rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .section-title { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-secondary); }
+        .section-subtitle { font-size: 0.68rem; color: var(--text-muted); margin-top: 1px; }
+
+        label { font-weight: 600; font-size: 0.82rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-secondary); display: block; margin-bottom: 6px; }
+        .sub-label { font-weight: 600; font-size: 0.78rem; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-secondary); display: block; margin-top: 14px; margin-bottom: 6px; }
+
+        input[type="text"], input[type="datetime-local"], textarea, select {
+            width: 100%; background: var(--bg-input); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-primary); font-family: inherit; font-size: 1rem; padding: 12px 14px; outline: none; transition: border-color 0.15s; -webkit-appearance: none; appearance: none;
+        }
+        input[type="text"]:focus, input[type="datetime-local"]:focus, textarea:focus, select:focus { border-color: var(--border-focus); }
+        input[type="datetime-local"] { color-scheme: dark; }
+        textarea { resize: vertical; min-height: 72px; line-height: 1.5; }
+        select { cursor: pointer; }
+        select option { background: var(--bg-card); }
+
+        .input-row { display: flex; gap: 8px; align-items: flex-start; }
+        .input-row input { flex: 1; min-width: 0; }
+
+        .saved-items { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+        .saved-item { display: inline-flex; align-items: center; gap: 4px; background: var(--accent-dim); color: var(--text-secondary); font-size: 0.78rem; padding: 4px 8px; border-radius: 20px; cursor: pointer; transition: background 0.15s; }
+        .saved-item:hover { background: var(--border-focus); color: var(--text-primary); }
+        .saved-item .del { color: var(--text-muted); font-size: 1rem; line-height: 1; padding: 0 2px; }
+        .saved-item .del:hover { color: var(--danger-hover); }
+
+        .var-uppgift-box { background: var(--accent-dim); border: 2px solid var(--accent); border-radius: var(--radius-sm); padding: 10px 14px; margin-top: 14px; }
+        .var-uppgift-box .sub-label { margin-top: 0; color: var(--accent); }
+        .var-uppgift-box textarea { border-color: var(--border-focus); }
+
+        .dyn-card { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 8px; }
+        .dyn-card input, .dyn-card textarea { margin-bottom: 6px; }
+        .dyn-card input:last-of-type, .dyn-card textarea:last-of-type { margin-bottom: 0; }
+        .dyn-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+        .dyn-card-title { font-size: 0.75rem; font-weight: 600; color: var(--text-muted); letter-spacing: 0.06em; text-transform: uppercase; }
+
+        .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 12px 20px; border: none; border-radius: var(--radius); font-family: inherit; font-size: 0.95rem; font-weight: 600; letter-spacing: 0.04em; cursor: pointer; transition: background 0.15s, transform 0.1s; -webkit-tap-highlight-color: transparent; }
+        .btn:active { transform: scale(0.97); }
+        .btn-primary { width: 100%; background: var(--accent); color: #fff; margin-top: 8px; font-size: 1rem; border: none; }
+        .btn-primary:hover { background: var(--accent-hover); }
+        .btn-sm { min-height: 40px; padding: 8px 14px; border-radius: var(--radius-sm); font-size: 0.85rem; white-space: nowrap; flex-shrink: 0; }
+        .btn-time { background: var(--accent-dim); color: var(--accent); border: none; }
+        .btn-time:hover { background: var(--border-focus); }
+        .btn-copy { width: 100%; background: var(--info); color: #fff; margin-bottom: 12px; border: none; }
+        .btn-copy:hover { background: var(--info-hover); }
+        .btn-secondary { flex: 1; background: var(--bg-secondary); color: var(--text-secondary); border: 1px solid var(--border); }
+        .btn-secondary:hover { background: var(--bg-card); color: var(--text-primary); }
+        .btn-danger { width: 100%; background: var(--danger); color: #fff; border: none; margin-top: 8px; }
+        .btn-danger:hover { background: var(--danger-hover); }
+        .btn-add { background: var(--accent-dim); color: var(--accent); border: 1px dashed var(--accent); border-radius: var(--radius-sm); padding: 8px 14px; font-size: 0.82rem; font-weight: 600; cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; transition: background 0.15s; }
+        .btn-add:hover { background: var(--border-focus); }
+        .btn-remove-sm { background: none; border: none; color: var(--text-muted); font-size: 1rem; cursor: pointer; padding: 4px 8px; border-radius: var(--radius-sm); flex-shrink: 0; transition: color 0.15s; min-height: 36px; }
+        .btn-remove-sm:hover { color: var(--danger-hover); }
+        .button-group { display: flex; gap: 10px; }
+        .divider { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
+
+        .result-view { display: none; }
+        .result-view.active { display: block; }
+        .form-view.hidden { display: none; }
+        .result-header { font-size: 0.8rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); text-align: center; margin-bottom: 12px; }
+        .report-output { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; font-family: 'Courier New', monospace; font-size: 0.92rem; line-height: 1.9; white-space: pre-wrap; color: var(--text-primary); margin-bottom: 14px; }
+        .copy-feedback { text-align: center; color: var(--accent); font-size: 0.85rem; font-weight: 600; height: 24px; opacity: 0; transition: opacity 0.2s; margin-bottom: 12px; }
+        .copy-feedback.show { opacity: 1; }
+
+        /* PUK Import */
+        .import-group { border-left: 3px solid var(--info); }
+        .import-group .section-letter { background: rgba(21,101,192,.15); border-color: var(--info); color: var(--info); font-size: .85rem; }
+        .import-group textarea { min-height: 120px; font-size: .88rem; }
+        .btn-import { width: 100%; background: var(--info); color: #fff; border: none; margin-top: 8px; }
+        .btn-import:hover { background: var(--info-hover); }
+        .import-feedback { font-size: .78rem; color: var(--accent); text-align: center; margin-top: 8px; min-height: 20px; opacity: 0; transition: opacity .3s; }
+        .import-feedback.show { opacity: 1; }
+        @keyframes fieldFlash { 0%{box-shadow:0 0 0 0 rgba(76,175,80,.5)} 50%{box-shadow:0 0 0 4px rgba(76,175,80,.3)} 100%{box-shadow:none} }
+        .field-flash { animation: fieldFlash .6s ease-out; }
+
+        /* Läs upp – fullskärm */
+        .read-overlay { display:none; position:fixed; inset:0; z-index:9999; background:#000; padding:24px 20px; overflow-y:auto; }
+        .read-overlay.active { display:block; }
+        .read-overlay pre { font-family:'Courier New',monospace; font-size:clamp(24px,5vw,40px); line-height:1.7; color:#e8f0e8; white-space:pre-wrap; word-break:break-word; }
+        .read-close { position:fixed; top:12px; right:16px; z-index:10000; background:rgba(255,255,255,.15); border:none; color:#fff; font-size:1.6rem; width:44px; height:44px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+        .read-close:hover { background:rgba(255,255,255,.3); }
+        .btn-read { width:100%; background:#1a321a; color:var(--accent); border:2px solid var(--accent); margin-bottom:12px; }
+        .btn-read:hover { background:var(--accent-dim); }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <div class="topbar">
+        <a href="index.html" class="back-btn">&#8592;</a>
+        <div class="topbar-title">
+            <h1>O.B.O</h1>
+            <p>Orientering &middot; Beslut &middot; Order</p>
+        </div>
+    </div>
+
+    <nav class="tab-nav">
+        <a href="obslosa.html" class="tab-link">OBSL&Ouml;SA</a>
+        <a href="fors.html" class="tab-link">FORS</a>
+        <a href="pedars.html" class="tab-link">PEDARS</a>
+        <a href="postschema.html" class="tab-link">SCHEMA</a>
+        <a href="eobusare.html" class="tab-link">EOBUSARE</a>
+        <a href="obo.html" class="tab-link active">OBO</a>
+        <a href="rassoika.html" class="tab-link">RASSOIKA</a>
+    </nav>
+
+    <!-- FORM VIEW -->
+    <div class="form-view" id="formView">
+
+        <!-- PUK-IMPORT -->
+        <div class="form-group import-group">
+            <div class="section-label">
+                <div class="section-letter">&#9997;</div>
+                <div>
+                    <div class="section-title">Importera 5-punktsorder</div>
+                    <div class="section-subtitle">Klistra in PUK fr&aring;n h&ouml;gre chef &ndash; f&auml;lten fylls automatiskt</div>
+                </div>
+            </div>
+            <textarea id="pukInput" placeholder="Klistra in 5-punktsorder (PUK) h&auml;r...&#10;&#10;Parsern letar efter: ORIENTERING, BESLUT/VERKSAMHETSID&Eacute;, ORDER/UPPGIFTER, UNDERH&Aring;LL, LEDNING"></textarea>
+            <button class="btn btn-import" onclick="parsePUK()">Tolka &amp; fyll i</button>
+            <div class="import-feedback" id="importFeedback"></div>
+        </div>
+
+        <!-- Rubrikfält -->
+        <div class="form-group">
+            <label for="orderFormat">Orderformat</label>
+            <select id="orderFormat">
+                <option value="OBO">OBO</option>
+                <option value="OBK">OBK</option>
+            </select>
+
+            <label for="tnr" style="margin-top:12px">TNR</label>
+            <div class="input-row" style="margin-top:6px">
+                <input type="text" id="tnr" placeholder="DDHHMM" inputmode="numeric" maxlength="6" autocomplete="off">
+                <button class="btn btn-sm btn-time" onclick="setNow()">Nu</button>
+            </div>
+            <div style="font-size:.72rem;color:var(--text-muted);margin-top:5px">Format: DDHHMM (dag–timme–minut, t.ex. 231430)</div>
+
+            <label for="plats" style="margin-top:12px">Plats</label>
+            <input type="text" id="plats" placeholder="Plats f&ouml;r ordergivningen">
+        </div>
+
+        <!-- Sektion O – ORIENTERING -->
+        <div class="form-group section-group">
+            <div class="section-label">
+                <div class="section-letter">O</div>
+                <div>
+                    <div class="section-title">Orientering</div>
+                    <div class="section-subtitle">VAD &ndash; Fyll bara i vad som &auml;r relevant. Tomma f&auml;lt utel&auml;mnas i export.</div>
+                </div>
+            </div>
+
+            <label for="o_motstandaren">Motst&aring;ndaren</label>
+            <textarea id="o_motstandaren" placeholder="Fienden &mdash; f&ouml;r&auml;ndringar, hot, r&ouml;relser..."></textarea>
+
+            <label for="o_egna" style="margin-top:12px">Egna f&ouml;rband</label>
+            <textarea id="o_egna" placeholder="Egna f&ouml;rband &mdash; kompaniets/plutonens uppgift, sidof&ouml;rband..."></textarea>
+
+            <label for="o_terrang" style="margin-top:12px">Terr&auml;ngen</label>
+            <textarea id="o_terrang" placeholder="Terr&auml;ngen &mdash; relevant f&ouml;r uppgiften..."></textarea>
+
+            <label for="o_civil" style="margin-top:12px">Civill&auml;get</label>
+            <textarea id="o_civil" placeholder="Civill&auml;get &mdash; civil n&auml;rvaro, restriktioner..."></textarea>
+
+            <label for="o_plut_uppgift" style="margin-top:12px">Plutonens uppgift</label>
+            <textarea id="o_plut_uppgift" placeholder="Plutonens uppgift (vid behov)..."></textarea>
+
+            <div class="var-uppgift-box">
+                <span class="sub-label">V&Aring;R UPPGIFT (ordagrant)</span>
+                <textarea id="o_var_uppgift" rows="3" placeholder="V&Aring;R UPPGIFT (ordagrant fr&aring;n h&ouml;gre chef) &mdash; OBLIGATORISKT"></textarea>
+            </div>
+        </div>
+
+        <!-- Sektion B – BESLUT -->
+        <div class="form-group section-group">
+            <div class="section-label">
+                <div class="section-letter">B</div>
+                <div>
+                    <div class="section-title">Beslut</div>
+                    <div class="section-subtitle">HUR &ndash; Chefens plan</div>
+                </div>
+            </div>
+
+            <span class="sub-label">M&aring;lbild (valfritt)</span>
+            <textarea id="b_malb" placeholder="Hur ser det ut n&auml;r uppgiften &auml;r l&ouml;st? (Dr&ouml;narbild 200m upp)"></textarea>
+
+            <span class="sub-label">GFI &ndash; Genomf&ouml;randeid&eacute;</span>
+            <textarea id="b_inled" rows="2" placeholder="Inledningsvis..."></textarea>
+            <textarea id="b_darefter" rows="2" placeholder="D&auml;refter..." style="margin-top:6px"></textarea>
+            <textarea id="b_slutligen" rows="2" placeholder="Slutligen..." style="margin-top:6px"></textarea>
+
+            <span class="sub-label">RIL &ndash; Riktlinjer (valfritt)</span>
+            <textarea id="b_ril" placeholder="Vad g&auml;ller fortl&ouml;pande, omfallsplan..."></textarea>
+        </div>
+
+        <!-- Sektion O/K – ORDER/KOMMANDO -->
+        <div class="form-group section-group" id="orderSection">
+            <div class="section-label">
+                <div class="section-letter" id="orderSectionLetter">O</div>
+                <div>
+                    <div class="section-title" id="orderSectionTitle">Order</div>
+                    <div class="section-subtitle">VEM / N&Auml;R</div>
+                </div>
+            </div>
+
+            <div id="orderLista"></div>
+            <button class="btn-add" onclick="addOrder()">+ L&auml;gg till ordertagare</button>
+        </div>
+
+        <button class="btn btn-primary" onclick="generateReport()">Generera order</button>
+
+    </div><!-- /form-view -->
+
+    <!-- RESULT VIEW -->
+    <div class="result-view" id="resultView">
+        <div class="result-header">Order genererad</div>
+        <button class="btn btn-copy" onclick="copyReport()">Kopiera text</button>
+        <button class="btn btn-read" onclick="enterReadMode()">&#128266; L&auml;s upp &ndash; fullsk&auml;rm</button>
+        <div class="copy-feedback" id="copyFeedback">Kopierat!</div>
+        <pre class="report-output" id="reportOutput"></pre>
+        <div class="button-group">
+            <button class="btn btn-secondary" onclick="goBack()">&#8592; &Auml;ndra</button>
+            <button class="btn btn-danger flex1" onclick="clearAll()">Rensa allt</button>
+        </div>
+        <div style="height:24px"></div>
+    </div>
+
+</div><!-- /container -->
+
+<!-- FULLSKÄRM LÄSVY -->
+<div class="read-overlay" id="readOverlay">
+    <button class="read-close" onclick="exitReadMode()" title="St&auml;ng">&#10005;</button>
+    <pre id="readContent"></pre>
+</div>
+
+<script>
+// ============================================================
+// UTILITY
+// ============================================================
+function v(id) {
+    const el = document.getElementById(id);
+    if (!el) return '';
+    return el.value.trim();
+}
+
+function lsGet(key) {
+    try { return JSON.parse(localStorage.getItem(key)) || null; } catch(e) { return null; }
+}
+
+function lsSet(key, val) {
+    try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {}
+}
+
+function setNow() {
+    const now = new Date();
+    const p = n => String(n).padStart(2, '0');
+    document.getElementById('tnr').value = p(now.getDate()) + p(now.getHours()) + p(now.getMinutes());
+}
+
+// ============================================================
+// DYNAMISK ORDERLISTA
+// ============================================================
+let orderCount = 0;
+
+function addOrder() {
+    orderCount++;
+    const lista = document.getElementById('orderLista');
+    const card = document.createElement('div');
+    card.className = 'dyn-card';
+    card.id = 'orderCard_' + orderCount;
+    card.innerHTML = `
+        <div class="dyn-card-header">
+            <span class="dyn-card-title">Ordertagare ${orderCount}</span>
+            <button class="btn-remove-sm" onclick="removeCard('orderCard_${orderCount}')" title="Ta bort">&#10005;</button>
+        </div>
+        <input type="text" placeholder="Enhet/Person (ex: 1:a omg&aring;ng)">
+        <textarea rows="2" placeholder="Uppgift..." style="margin-top:6px"></textarea>
+        <input type="text" placeholder="Beredd... (valfritt)" style="margin-top:6px">
+    `;
+    lista.appendChild(card);
+}
+
+function removeCard(id) {
+    const el = document.getElementById(id);
+    if (el) el.remove();
+}
+
+// ============================================================
+// ORDERFORMAT CHANGE
+// ============================================================
+document.getElementById('orderFormat').addEventListener('change', function() {
+    const isOBK = this.value === 'OBK';
+    document.getElementById('orderSectionLetter').textContent = isOBK ? 'K' : 'O';
+    document.getElementById('orderSectionTitle').textContent = isOBK ? 'Kommando' : 'Order';
+});
+
+// ============================================================
+// GENERERA RAPPORT
+// ============================================================
+function generateReport() {
+    const format = document.getElementById('orderFormat').value;
+
+    const lines = [
+        `ORDER (${format})`,
+        `TNR: ${v('tnr') || '-'}`
+    ];
+    if (v('plats')) lines.push(`Plats: ${v('plats')}`);
+    lines.push('');
+
+    // Orientering
+    const oriLines = [];
+    if (v('o_motstandaren')) oriLines.push(`Fi: ${v('o_motstandaren')}`);
+    if (v('o_egna')) oriLines.push(`Egna: ${v('o_egna')}`);
+    if (v('o_terrang')) oriLines.push(`Terr\u00e4ng: ${v('o_terrang')}`);
+    if (v('o_civil')) oriLines.push(`Civil: ${v('o_civil')}`);
+    if (v('o_plut_uppgift')) oriLines.push(`Plutonens uppgift: ${v('o_plut_uppgift')}`);
+    if (oriLines.length || v('o_var_uppgift')) {
+        lines.push('ORIENTERING');
+        oriLines.forEach(l => lines.push(l));
+        if (v('o_var_uppgift')) lines.push(`V\u00c5R UPPGIFT: ${v('o_var_uppgift')}`);
+        lines.push('');
+    }
+
+    // Beslut
+    const besLines = [];
+    if (v('b_malb')) besLines.push(`M\u00e5lbild: ${v('b_malb')}`);
+    if (v('b_inled')) besLines.push(`Inledningsvis: ${v('b_inled')}`);
+    if (v('b_darefter')) besLines.push(`D\u00e4refter: ${v('b_darefter')}`);
+    if (v('b_slutligen')) besLines.push(`Slutligen: ${v('b_slutligen')}`);
+    if (v('b_ril')) besLines.push(`RIL: ${v('b_ril')}`);
+    if (besLines.length) {
+        lines.push('BESLUT');
+        besLines.forEach(l => lines.push(l));
+        lines.push('');
+    }
+
+    // Order/Kommando
+    const orderKort = document.getElementById('orderLista').children;
+    if (orderKort.length) {
+        lines.push(format === 'OBK' ? 'KOMMANDO' : 'ORDER');
+        Array.from(orderKort).forEach(card => {
+            const inputs = card.querySelectorAll('input');
+            const ta = card.querySelector('textarea');
+            const enhet = inputs[0]?.value.trim();
+            const uppgift = ta?.value.trim();
+            const beredd = inputs[1]?.value.trim();
+            if (enhet || uppgift) {
+                lines.push(`${enhet || '?'}: ${uppgift || ''}`);
+                if (beredd) lines.push(`  Beredd: ${beredd}`);
+            }
+        });
+        lines.push('');
+    }
+
+    lines.push('');
+    lines.push('SLUT. Fr\u00e5gor? Fram\u00e5t!');
+
+    document.getElementById('reportOutput').textContent = lines.join('\n');
+    document.getElementById('formView').classList.add('hidden');
+    document.getElementById('resultView').classList.add('active');
+    window.scrollTo(0, 0);
+}
+
+// ============================================================
+// COPY / BACK / CLEAR
+// ============================================================
+function copyReport() {
+    const text = document.getElementById('reportOutput').textContent;
+    navigator.clipboard.writeText(text).then(() => {
+        const fb = document.getElementById('copyFeedback');
+        fb.classList.add('show');
+        setTimeout(() => fb.classList.remove('show'), 2000);
+    });
+}
+
+function goBack() {
+    document.getElementById('formView').classList.remove('hidden');
+    document.getElementById('resultView').classList.remove('active');
+    window.scrollTo(0, 0);
+}
+
+function clearAll() {
+    if (!confirm('Rensa alla f\u00e4lt och b\u00f6rja om?')) return;
+    document.getElementById('orderLista').innerHTML = '';
+    orderCount = 0;
+    document.querySelectorAll('input[type="text"], textarea').forEach(el => el.value = '');
+    document.getElementById('orderFormat').value = 'OBO';
+    document.getElementById('orderSectionLetter').textContent = 'O';
+    document.getElementById('orderSectionTitle').textContent = 'Order';
+    goBack();
+    setNow();
+    addOrder(); addOrder();
+}
+
+// ============================================================
+// INIT
+// ============================================================
+document.addEventListener('DOMContentLoaded', function() {
+    setNow();
+    addOrder();
+    addOrder();
+});
+
+// ============================================================
+// PUK-PARSER – Tolka 5-punktsorder
+// ============================================================
+function parsePUK() {
+    const raw = document.getElementById('pukInput').value.trim();
+    if (!raw) return;
+
+    // Dela texten i sektioner baserat på vanliga rubriker
+    const sectionPatterns = [
+        { key: 'ori',  re: /(?:^|\n)\s*(?:1[\.\):]?\s*)?(?:ORIENTERING|ORI)\s*[:\-]?\s*\n/i },
+        { key: 'bes',  re: /(?:^|\n)\s*(?:2[\.\):]?\s*)?(?:BESLUT|VERKSAMHETSID[EÉ]|GFI)\s*[:\-]?\s*\n/i },
+        { key: 'ord',  re: /(?:^|\n)\s*(?:3[\.\):]?\s*)?(?:ORDER|UPPGIFTER|KOMMANDO)\s*[:\-]?\s*\n/i },
+        { key: 'und',  re: /(?:^|\n)\s*(?:4[\.\):]?\s*)?(?:UNDERH[AÅ]LL|UTH[AÅ]LLIGHET)\s*[:\-]?\s*\n/i },  // end-marker only
+        { key: 'led',  re: /(?:^|\n)\s*(?:5[\.\):]?\s*)?(?:LEDNING|SAMBAND)\s*[:\-]?\s*\n/i }              // end-marker only
+    ];
+
+    // Hitta positioner
+    const positions = [];
+    sectionPatterns.forEach(sp => {
+        const m = raw.match(sp.re);
+        if (m) positions.push({ key: sp.key, start: m.index + m[0].length });
+    });
+    positions.sort((a, b) => a.start - b.start);
+
+    // Extrahera sektionstext
+    const sections = {};
+    positions.forEach((p, i) => {
+        const end = i + 1 < positions.length ? positions[i + 1].start : raw.length;
+        // Gå tillbaka till rubriken för att trimma rätt
+        sections[p.key] = raw.substring(p.start, end).trim();
+    });
+
+    let filled = 0;
+
+    // Hjälpfunktion: sätter fält om det är tomt
+    function fillField(id, value) {
+        if (!value || !value.trim()) return;
+        const el = document.getElementById(id);
+        if (!el || el.value.trim()) return; // Skriv inte över
+        el.value = value.trim();
+        el.classList.add('field-flash');
+        setTimeout(() => el.classList.remove('field-flash'), 700);
+        filled++;
+    }
+
+    // Hjälpfunktion: extrahera sub-sektion ur text
+    function extract(text, patterns) {
+        for (const p of patterns) {
+            const m = text.match(p);
+            if (m) return m[1].trim();
+        }
+        return '';
+    }
+
+    // ── ORIENTERING ──
+    if (sections.ori) {
+        const t = sections.ori;
+        fillField('o_motstandaren', extract(t, [
+            /(?:Fi(?:ende)?|Motst[aå]ndare[n]?)\s*[:\-]\s*([\s\S]*?)(?=\n\s*(?:Egna|Terr|Civil|V[aå]r\s+uppgift|Pluton|$))/i
+        ]));
+        fillField('o_egna', extract(t, [
+            /(?:Egna(?:\s+f[oö]rband)?)\s*[:\-]\s*([\s\S]*?)(?=\n\s*(?:Terr|Civil|V[aå]r\s+uppgift|Pluton|Fi|$))/i
+        ]));
+        fillField('o_terrang', extract(t, [
+            /(?:Terr[aä]ng(?:en)?)\s*[:\-]\s*([\s\S]*?)(?=\n\s*(?:Civil|V[aå]r\s+uppgift|Pluton|Fi|Egna|$))/i
+        ]));
+        fillField('o_civil', extract(t, [
+            /(?:Civil(?:l[aä]ge[t]?|befolkning(?:en)?)?)\s*[:\-]\s*([\s\S]*?)(?=\n\s*(?:V[aå]r\s+uppgift|Pluton|Fi|Egna|Terr|$))/i
+        ]));
+        fillField('o_plut_uppgift', extract(t, [
+            /(?:Pluton(?:ens)?\s+uppgift)\s*[:\-]\s*([\s\S]*?)(?=\n\s*(?:V[aå]r\s+uppgift|Fi|Egna|Terr|Civil|$))/i
+        ]));
+        fillField('o_var_uppgift', extract(t, [
+            /(?:V[aå]r\s+uppgift)\s*[:\-]\s*([\s\S]*?)$/im
+        ]));
+        // Om inga sub-rubriker hittades, lägg allt i motståndaren
+        if (filled === 0 && sections.ori.length > 5) {
+            fillField('o_motstandaren', sections.ori);
+        }
+    }
+
+    // ── BESLUT ──
+    if (sections.bes) {
+        const t = sections.bes;
+        fillField('b_malb', extract(t, [
+            /(?:M[aå]lbild)\s*[:\-]\s*([\s\S]*?)(?=\n\s*(?:Inled|GFI|D[aä]refter|Slutligen|RIL|$))/i
+        ]));
+        fillField('b_inled', extract(t, [
+            /(?:Inledningsvis|Inled(?:ning)?)\s*[:\-]\s*([\s\S]*?)(?=\n\s*(?:D[aä]refter|Slutligen|RIL|M[aå]lbild|$))/i
+        ]));
+        fillField('b_darefter', extract(t, [
+            /(?:D[aä]refter)\s*[:\-]\s*([\s\S]*?)(?=\n\s*(?:Slutligen|RIL|Inled|M[aå]lbild|$))/i
+        ]));
+        fillField('b_slutligen', extract(t, [
+            /(?:Slutligen)\s*[:\-]\s*([\s\S]*?)(?=\n\s*(?:RIL|Inled|D[aä]refter|M[aå]lbild|$))/i
+        ]));
+        fillField('b_ril', extract(t, [
+            /(?:RIL|Riktlinjer)\s*[:\-]\s*([\s\S]*?)$/im
+        ]));
+        // Fallback: om inga sub-rubriker, lägg allt i GFI inledning
+        if (!v('b_inled') && !v('b_malb') && sections.bes.length > 5) {
+            fillField('b_inled', sections.bes);
+        }
+    }
+
+    // ── ORDER/UPPGIFTER ──
+    if (sections.ord) {
+        // Försök parsa rader som "Enhet: uppgift"
+        const lines = sections.ord.split('\n').filter(l => l.trim());
+        const orderEntries = [];
+        let current = null;
+        lines.forEach(line => {
+            const m = line.match(/^\s*[-•*]?\s*(.+?)\s*[:\-–]\s+(.+)/);
+            if (m) {
+                orderEntries.push({ enhet: m[1].trim(), uppgift: m[2].trim() });
+            } else if (line.trim()) {
+                // Fortsättningsrad
+                if (orderEntries.length) {
+                    orderEntries[orderEntries.length - 1].uppgift += ' ' + line.trim();
+                } else {
+                    orderEntries.push({ enhet: '', uppgift: line.trim() });
+                }
+            }
+        });
+
+        if (orderEntries.length) {
+            // Rensa befintliga tomma kort och skapa nya
+            const lista = document.getElementById('orderLista');
+            const existing = lista.querySelectorAll('.dyn-card');
+            let emptyCards = [];
+            existing.forEach(card => {
+                const inputs = card.querySelectorAll('input');
+                const ta = card.querySelector('textarea');
+                if (!inputs[0]?.value.trim() && !ta?.value.trim()) emptyCards.push(card);
+            });
+            emptyCards.forEach(c => c.remove());
+
+            orderEntries.forEach(entry => {
+                orderCount++;
+                const card = document.createElement('div');
+                card.className = 'dyn-card field-flash';
+                card.id = 'orderCard_' + orderCount;
+                card.innerHTML = `
+                    <div class="dyn-card-header">
+                        <span class="dyn-card-title">Ordertagare ${orderCount}</span>
+                        <button class="btn-remove-sm" onclick="removeCard('orderCard_${orderCount}')" title="Ta bort">&#10005;</button>
+                    </div>
+                    <input type="text" placeholder="Enhet/Person" value="${entry.enhet.replace(/"/g, '&quot;')}">
+                    <textarea rows="2" placeholder="Uppgift..." style="margin-top:6px">${entry.uppgift}</textarea>
+                    <input type="text" placeholder="Beredd... (valfritt)" style="margin-top:6px">
+                `;
+                lista.appendChild(card);
+                setTimeout(() => card.classList.remove('field-flash'), 700);
+                filled++;
+            });
+        }
+    }
+
+    // Feedback
+    const fb = document.getElementById('importFeedback');
+    if (filled > 0) {
+        fb.textContent = `${filled} f\u00e4lt ifyllda fr\u00e5n PUK.`;
+        fb.style.color = 'var(--accent)';
+    } else {
+        fb.textContent = 'Kunde inte tolka n\u00e5gra sektioner. Kontrollera formatet.';
+        fb.style.color = 'var(--danger-hover)';
+    }
+    fb.classList.add('show');
+    setTimeout(() => fb.classList.remove('show'), 4000);
+}
+
+// ============================================================
+// FULLSKÄRM LÄSVY
+// ============================================================
+function enterReadMode() {
+    const text = document.getElementById('reportOutput').textContent;
+    document.getElementById('readContent').textContent = text;
+    document.getElementById('readOverlay').classList.add('active');
+    requestWakeLock();
+}
+
+function exitReadMode() {
+    document.getElementById('readOverlay').classList.remove('active');
+}
+
+// ============================================================
+// WAKE LOCK – håller skärmen på vid orderläsning
+// ============================================================
+let wakeLock = null;
+async function requestWakeLock() {
+    if ('wakeLock' in navigator) {
+        try { wakeLock = await navigator.wakeLock.request('screen'); } catch(_) {}
+    }
+}
+function releaseWakeLock() {
+    if (wakeLock) { wakeLock.release().catch(()=>{}); wakeLock = null; }
+}
+// Aktivera wake lock när rapporten visas, släpp vid redigering
+const _origGenerateReport = generateReport;
+generateReport = function() { _origGenerateReport(); requestWakeLock(); };
+const _origGoBack = goBack;
+goBack = function() { releaseWakeLock(); _origGoBack(); };
+
+// ============================================================
+// SERVICE WORKER
+// ============================================================
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('service-worker.js');
+}
+
+// ── Feedback-länk ──────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+    const a = document.createElement('a');
+    a.href = 'https://github.com/gitjoda71/faltrapport/issues/new?title=%5BBeta-Feedback%5D%20OBO&body=**Form%3A**%20OBO%0A%0A**Beskriv%20problemet%2Ff%C3%B6rslaget%3A**%0A%0A**Telefon%3A**';
+    a.target = '_blank'; a.rel = 'noopener noreferrer';
+    a.textContent = 'Bugg eller förslag? Lämna feedback →';
+    a.style.cssText = 'display:block;text-align:center;padding:24px 0 12px;font-size:0.7rem;color:#5a7a5a;text-decoration:none';
+    const c = document.querySelector('.container');
+    if (c) c.appendChild(a);
+});
+</script>
+</body>
+</html>

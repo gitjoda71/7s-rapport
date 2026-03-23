@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0d1f0d">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>PEDARS – Underhållsrapport</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary:#0d1f0d;--bg-secondary:#152815;--bg-card:#1a321a;--bg-input:#0f240f;
+            --border:#2d4a2d;--border-focus:#4a7c4a;--text-primary:#e8f0e8;--text-secondary:#8aaa8a;
+            --text-muted:#5a7a5a;--accent:#4caf50;--accent-hover:#66bb6a;--accent-dim:#1e3d1e;
+            --danger:#c62828;--danger-hover:#e53935;--info:#1565c0;--info-hover:#1976d2;
+            --radius:8px;--radius-sm:4px;
+        }
+        *{box-sizing:border-box;margin:0;padding:0;}
+        body{font-family:'Inter',system-ui,sans-serif;background:var(--bg-primary);color:var(--text-primary);min-height:100vh;padding:16px;}
+        .container{max-width:600px;margin:0 auto;}
+
+        .topbar{display:flex;align-items:center;gap:12px;padding:12px 0 16px;}
+        .back-btn{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:var(--radius-sm);background:var(--bg-secondary);border:1px solid var(--border);color:var(--text-secondary);text-decoration:none;font-size:1.1rem;flex-shrink:0;}
+        .back-btn:hover{background:var(--bg-card);color:var(--text-primary);}
+        .topbar-title h1{font-size:1.4rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);}
+        .topbar-title p{font-size:.72rem;color:var(--text-muted);letter-spacing:.06em;margin-top:2px;}
+
+        .tab-nav{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;margin-bottom:16px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius);padding:4px;}
+        .tab-link{text-align:center;padding:8px 2px;border-radius:var(--radius-sm);color:var(--text-muted);text-decoration:none;font-size:.7rem;font-weight:700;letter-spacing:.04em;transition:background .15s,color .15s;-webkit-tap-highlight-color:transparent;}
+        .tab-link:hover{background:var(--bg-card);color:var(--text-secondary);}
+        .tab-link.active{background:var(--accent-dim);color:var(--accent);}
+
+        .form-group{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:10px;}
+        .form-group.section-group{border-left:3px solid var(--accent);}
+        .section-label{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+        .section-letter{width:32px;height:32px;border-radius:50%;background:var(--accent-dim);border:1px solid var(--accent);color:var(--accent);font-size:1rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+        .section-title{font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-secondary);}
+        .section-subtitle{font-size:.68rem;color:var(--text-muted);margin-top:1px;}
+        label,.field-label{font-weight:600;font-size:.82rem;letter-spacing:.06em;text-transform:uppercase;color:var(--text-secondary);}
+        .field-hint{font-size:.72rem;color:var(--text-muted);margin-top:4px;opacity:.75;}
+        .sub-label{font-size:.75rem;font-weight:600;color:var(--text-muted);letter-spacing:.05em;text-transform:uppercase;margin-bottom:5px;margin-top:10px;}
+
+        input[type=text],input[type=number],select,textarea{width:100%;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-primary);font-family:inherit;font-size:1rem;padding:12px 14px;outline:none;transition:border-color .15s;-webkit-appearance:none;}
+        input[type=text]:focus,input[type=number]:focus,select:focus,textarea:focus{border-color:var(--border-focus);}
+        textarea{resize:vertical;min-height:72px;line-height:1.5;}
+        select option{background:var(--bg-card);}
+        input[type=number]{-moz-appearance:textfield;}
+        input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
+
+        .input-row{display:flex;gap:8px;}
+        .input-row>*{flex:1;min-width:0;}
+        .input-col2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+
+        /* Dynamiska kort (Pers avvikelser, Fordon, Rep) */
+        .card-list{display:flex;flex-direction:column;gap:8px;margin-top:8px;}
+        .dyn-card{background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;position:relative;}
+        .dyn-card .del-btn{position:absolute;top:8px;right:10px;background:none;border:none;color:var(--text-muted);font-size:1.3rem;cursor:pointer;line-height:1;padding:0;}
+        .dyn-card .del-btn:hover{color:var(--danger-hover);}
+        .card-row{display:flex;gap:8px;margin-top:6px;}
+        .card-row>*{flex:1;min-width:0;}
+
+        /* Ammo tabell */
+        .ammo-table{width:100%;border-collapse:collapse;font-size:.88rem;}
+        .ammo-table th{text-align:left;font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted);padding:6px 8px 4px;border-bottom:1px solid var(--border);}
+        .ammo-table td{padding:4px 4px;}
+        .ammo-table td input{padding:9px 8px;font-size:.9rem;}
+        .ammo-table tr:nth-child(even) td{background:rgba(255,255,255,.02);}
+
+        /* Samlad förmåga (3 grader) */
+        .sv-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px;}
+        .sv-btn{background:var(--bg-secondary);border:2px solid var(--border);border-radius:var(--radius-sm);padding:14px 8px;text-align:center;cursor:pointer;font-family:inherit;font-size:.82rem;font-weight:700;color:var(--text-muted);transition:all .15s;min-height:56px;line-height:1.3;}
+        .sv-btn.selected-gron{border-color:#4caf50;background:#1e3d1e;color:#4caf50;}
+        .sv-btn.selected-gul{border-color:#f9a825;background:#3e2800;color:#f9a825;}
+        .sv-btn.selected-rod{border-color:#c62828;background:#3e0000;color:#ef5350;}
+
+        .saved-items{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+        .saved-item{display:inline-flex;align-items:center;gap:4px;background:var(--accent-dim);color:var(--text-secondary);font-size:.78rem;padding:4px 8px;border-radius:20px;cursor:pointer;transition:background .15s;}
+        .saved-item:hover{background:var(--border-focus);color:var(--text-primary);}
+        .saved-item .del{color:var(--text-muted);font-size:1rem;line-height:1;padding:0 2px;}
+        .saved-item .del:hover{color:var(--danger-hover);}
+
+        .btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:12px 20px;border:none;border-radius:var(--radius);font-family:inherit;font-size:.95rem;font-weight:600;letter-spacing:.04em;cursor:pointer;transition:background .15s,transform .1s;-webkit-tap-highlight-color:transparent;}
+        .btn:active{transform:scale(.97);}
+        .btn-primary{width:100%;background:var(--accent);color:#fff;margin-top:8px;font-size:1rem;}
+        .btn-primary:hover{background:var(--accent-hover);}
+        .btn-add{width:100%;background:var(--bg-secondary);color:var(--text-secondary);border:1px dashed var(--border);margin-top:4px;font-size:.88rem;}
+        .btn-add:hover{background:var(--bg-card);border-color:var(--border-focus);color:var(--accent);}
+        .btn-copy{width:100%;background:var(--info);color:#fff;margin-bottom:12px;}
+        .btn-copy:hover{background:var(--info-hover);}
+        .btn-secondary{flex:1;background:var(--bg-secondary);color:var(--text-secondary);border:1px solid var(--border);}
+        .btn-secondary:hover{background:var(--bg-card);color:var(--text-primary);}
+        .btn-danger{flex:1;background:var(--danger);color:#fff;}
+        .btn-danger:hover{background:var(--danger-hover);}
+        .button-group{display:flex;gap:10px;}
+        .divider{border:none;border-top:1px solid var(--border);margin:16px 0;}
+
+        .result-view{display:none;} .result-view.active{display:block;}
+        .form-view.hidden{display:none;}
+        .result-header{font-size:.8rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);text-align:center;margin-bottom:12px;}
+        .report-output{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;font-family:'Courier New',monospace;font-size:.88rem;line-height:1.8;white-space:pre-wrap;color:var(--text-primary);margin-bottom:14px;}
+        .copy-feedback{text-align:center;color:var(--accent);font-size:.85rem;font-weight:600;height:24px;opacity:0;transition:opacity .2s;margin-bottom:12px;}
+        .copy-feedback.show{opacity:1;}
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="topbar">
+        <a href="index.html" class="back-btn">←</a>
+        <div class="topbar-title">
+            <h1>PEDARS</h1>
+            <p>Underhållsrapport – Pluton → KvM</p>
+        </div>
+    </div>
+    <nav class="tab-nav">
+        <a href="obslosa.html" class="tab-link">OBSLÖSA</a>
+        <a href="fors.html" class="tab-link">FORS</a>
+        <a href="pedars.html" class="tab-link active">PEDARS</a>
+        <a href="postschema.html" class="tab-link">SCHEMA</a>
+        <a href="eobusare.html" class="tab-link">EOBUSARE</a>
+        <a href="obo.html" class="tab-link">OBO</a>
+        <a href="rassoika.html" class="tab-link">RASSOIKA</a>
+    </nav>
+
+    <main>
+    <div class="form-view" id="formView">
+
+        <!-- Enhet + TNR + Sagesman -->
+        <div class="form-group">
+            <div class="input-col2">
+                <div>
+                    <div class="sub-label" style="margin-top:0">Enhet/Pluton</div>
+                    <input type="text" id="enhet" placeholder="2a Plut" autocomplete="off" style="margin-top:4px">
+                </div>
+                <div>
+                    <div class="sub-label" style="margin-top:0">TNR</div>
+                    <input type="text" id="tnr" placeholder="014" inputmode="numeric" autocomplete="off" style="margin-top:4px">
+                </div>
+            </div>
+        </div>
+
+        <!-- P – PERSONAL -->
+        <div class="form-group section-group">
+            <div class="section-label">
+                <div class="section-letter">P</div>
+                <div>
+                    <div class="section-title">Personal</div>
+                    <div class="section-subtitle">Antal tjänstbara · Avvikelser</div>
+                </div>
+            </div>
+            <div class="input-col2">
+                <div>
+                    <div class="sub-label" style="margin-top:0">Totalt i tjänst</div>
+                    <input type="number" id="p_total" placeholder="34" inputmode="numeric" min="0">
+                </div>
+                <div>
+                    <div class="sub-label" style="margin-top:0">Ska vara</div>
+                    <input type="number" id="p_ska" placeholder="36" inputmode="numeric" min="0">
+                </div>
+            </div>
+            <div class="sub-label">Avvikelser (namn + orsak)</div>
+            <div class="card-list" id="persLista"></div>
+            <button class="btn btn-add" onclick="addPers()">+ Lägg till avvikelse</button>
+        </div>
+
+        <!-- E – ERSÄTTNING -->
+        <div class="form-group section-group">
+            <div class="section-label">
+                <div class="section-letter">E</div>
+                <div>
+                    <div class="section-title">Ersättning av förnödenheter</div>
+                    <div class="section-subtitle">Vad behöver ni?</div>
+                </div>
+            </div>
+            <textarea id="e_ers" rows="2" placeholder="Ex: 10 st knäskydd, 1 st bårband, stridsransoner för 2 dygn..."></textarea>
+        </div>
+
+        <!-- D – DRIVMEDEL -->
+        <div class="form-group section-group">
+            <div class="section-label">
+                <div class="section-letter">D</div>
+                <div>
+                    <div class="section-title">Drivmedel</div>
+                    <div class="section-subtitle">Fordon · Nivå i %</div>
+                </div>
+            </div>
+            <div class="card-list" id="fordonsLista"></div>
+            <button class="btn btn-add" onclick="addFordon()">+ Lägg till fordon</button>
+        </div>
+
+        <!-- A – AMMUNITION -->
+        <div class="form-group section-group">
+            <div class="section-label">
+                <div class="section-letter">A</div>
+                <div>
+                    <div class="section-title">Ammunition</div>
+                    <div class="section-subtitle">Behov per ammunitionsslag</div>
+                </div>
+            </div>
+            <table class="ammo-table">
+                <thead><tr><th>Typ</th><th>Behov (ant.)</th></tr></thead>
+                <tbody id="ammoTabell"></tbody>
+            </table>
+        </div>
+
+        <!-- R – REPARATIONER -->
+        <div class="form-group section-group">
+            <div class="section-label">
+                <div class="section-letter">R</div>
+                <div>
+                    <div class="section-title">Reparationer</div>
+                    <div class="section-subtitle">Fordon med repbehov</div>
+                </div>
+            </div>
+            <div class="card-list" id="repLista"></div>
+            <button class="btn btn-add" onclick="addRep()">+ Lägg till fordon med repbehov</button>
+        </div>
+
+        <!-- S – SAMLAD FÖRMÅGA -->
+        <div class="form-group section-group">
+            <div class="section-label">
+                <div class="section-letter">S</div>
+                <div>
+                    <div class="section-title">Samlad förmåga</div>
+                    <div class="section-subtitle">Stridsvärde – välj ett alternativ</div>
+                </div>
+            </div>
+            <div class="sv-grid">
+                <button class="sv-btn" id="sv0" onclick="selectSV(0)">🟢 Grön<br><span style="font-size:.72rem;font-weight:400">Fullt stridsduglig</span></button>
+                <button class="sv-btn" id="sv1" onclick="selectSV(1)">🟡 Gul<br><span style="font-size:.72rem;font-weight:400">Reducerad förmåga</span></button>
+                <button class="sv-btn" id="sv2" onclick="selectSV(2)">🔴 Röd<br><span style="font-size:.72rem;font-weight:400">Ej stridsduglig</span></button>
+            </div>
+            <textarea id="s_motivering" rows="3" placeholder="Motivering / samlad förmågebedömning. Beskriv vad som begränsar förmågan och vad som behövs för att återställa den.
+
+Ex: Reducerad p.g.a. 2 skadade + låg drivmedelsläge. Kan lösa bevakningsuppgift men inte offensiva rörelser. Behov av evakuering + tankning inom 3h."></textarea>
+        </div>
+
+        <hr class="divider">
+        <button class="btn btn-primary" onclick="generateReport()">Generera PEDARS-rapport</button>
+    </div>
+
+    <div class="result-view" id="resultView">
+        <div class="result-header">PEDARS-rapport klar</div>
+        <div class="report-output" id="reportOutput"></div>
+        <button class="btn btn-copy" onclick="copyReport()">Kopiera till urklipp</button>
+        <div class="copy-feedback" id="copyFeedback">✓ Kopierat</div>
+        <div class="button-group">
+            <button class="btn btn-secondary" onclick="backToEdit()">Redigera</button>
+            <button class="btn btn-danger" onclick="resetForm()">Nollställ</button>
+        </div>
+    </div>
+    </main>
+</div>
+
+<script>
+// ── Ammunitionstyper ──────────────────────────────────────────────────────────
+const AMMO_TYPES = ['7.62','9 mm','8.4/slpsprj','8.4/sgr','8.4/rökgr','Pskott','Shgr','Närlys','Lysptr','Signptr'];
+
+function initAmmo() {
+    const tb = document.getElementById('ammoTabell');
+    AMMO_TYPES.forEach(typ => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td style="padding:4px 8px;color:var(--text-secondary);font-size:.88rem;white-space:nowrap">${typ}</td>
+                        <td><input type="number" inputmode="numeric" min="0" placeholder="0" id="ammo_${typ.replace(/[^a-z0-9]/gi,'_')}"></td>`;
+        tb.appendChild(tr);
+    });
+}
+
+// ── Dynamiska kort: Personal avvikelse ─────────────────────────────────────
+let persId = 0;
+function addPers() {
+    const id = ++persId;
+    const list = document.getElementById('persLista');
+    const card = document.createElement('div'); card.className = 'dyn-card'; card.id = `pers_${id}`;
+    card.innerHTML = `
+        <button class="del-btn" onclick="removeCard('pers_${id}')">×</button>
+        <input type="text" placeholder="Namn / befattningsnummer" autocomplete="off">
+        <div class="card-row">
+            <select>
+                <option value="Permission">Permission</option>
+                <option value="Annan ledighet">Annan ledighet</option>
+                <option value="Sjuk">Sjuk</option>
+                <option value="Skadad">Skadad</option>
+                <option value="Död">Död</option>
+                <option value="Saknad">Saknad</option>
+            </select>
+        </div>`;
+    list.appendChild(card);
+}
+
+// ── Dynamiska kort: Fordon (drivmedel) ────────────────────────────────────────
+let fordId = 0;
+function addFordon() {
+    const id = ++fordId;
+    const list = document.getElementById('fordonsLista');
+    const card = document.createElement('div'); card.className = 'dyn-card'; card.id = `ford_${id}`;
+    card.innerHTML = `
+        <button class="del-btn" onclick="removeCard('ford_${id}')">×</button>
+        <div class="card-row">
+            <input type="text" placeholder="Fordonstyp (ex: Pb 8)" autocomplete="off">
+            <input type="text" placeholder="Regnr" autocomplete="off" style="max-width:100px">
+        </div>
+        <div class="card-row" style="align-items:center;gap:10px;margin-top:8px">
+            <input type="number" inputmode="numeric" placeholder="%" min="0" max="100" style="max-width:80px">
+            <span style="font-size:.8rem;color:var(--text-muted)">% drivmedel kvar</span>
+        </div>`;
+    list.appendChild(card);
+}
+
+// ── Dynamiska kort: Reparationer ──────────────────────────────────────────────
+let repId = 0;
+function addRep() {
+    const id = ++repId;
+    const list = document.getElementById('repLista');
+    const card = document.createElement('div'); card.className = 'dyn-card'; card.id = `rep_${id}`;
+    card.innerHTML = `
+        <button class="del-btn" onclick="removeCard('rep_${id}')">×</button>
+        <div class="card-row">
+            <input type="text" placeholder="Fordonstyp" autocomplete="off">
+            <input type="text" placeholder="Regnr" autocomplete="off" style="max-width:100px">
+        </div>
+        <input type="text" placeholder="Repbehov / feelbeskrivning" autocomplete="off" style="margin-top:6px">
+        <div class="card-row" style="margin-top:6px">
+            <select>
+                <option value="Ja">Körbar: Ja</option>
+                <option value="Begränsad">Körbar: Begränsad</option>
+                <option value="Nej">Körbar: Nej</option>
+            </select>
+        </div>`;
+    list.appendChild(card);
+}
+
+function removeCard(id) { const el = document.getElementById(id); if(el) el.remove(); }
+
+// ── Samlad förmåga (3 grader) ─────────────────────────────────────────────────
+let svSelected = -1;
+const SV_LABELS = ['GRÖN – Fullt stridsduglig','GUL – Reducerad förmåga','RÖD – Ej stridsduglig'];
+const SV_CLASSES = ['selected-gron','selected-gul','selected-rod'];
+function selectSV(i) {
+    svSelected = i;
+    SV_CLASSES.forEach((c,idx) => { const btn = document.getElementById(`sv${idx}`); btn.className = 'sv-btn' + (idx===i?' '+c:''); });
+}
+
+// ── Rapport ───────────────────────────────────────────────────────────────────
+function v(id) { const el=document.getElementById(id); return el ? el.value.trim() : ''; }
+
+function generateReport() {
+    const lines = [
+        'PEDARS – UNDERHÅLLSRAPPORT',
+        `Enhet: ${v('enhet')||'-'}`,
+        `TNR:   ${v('tnr')||'-'}`,
+        '',
+    ];
+
+    // P
+    const tot = v('p_total'), ska = v('p_ska');
+    lines.push('P – PERSONAL');
+    lines.push(`Ska vara: ${ska||'?'}  |  I tjänst: ${tot||'?'}`);
+    const persDivs = document.getElementById('persLista').children;
+    if (persDivs.length) {
+        lines.push('Avvikelser:');
+        Array.from(persDivs).forEach(c => {
+            const inp = c.querySelector('input'); const sel = c.querySelector('select');
+            if (inp && inp.value.trim()) lines.push(`  - ${inp.value.trim()} (${sel ? sel.value : ''})`);
+        });
+    }
+    lines.push('');
+
+    // E
+    const ers = v('e_ers');
+    if (ers) { lines.push('E – ERSÄTTNING AV FÖRNÖDENHETER'); lines.push(ers); lines.push(''); }
+
+    // D
+    const fordDivs = document.getElementById('fordonsLista').children;
+    if (fordDivs.length) {
+        lines.push('D – DRIVMEDEL');
+        Array.from(fordDivs).forEach(c => {
+            const inputs = c.querySelectorAll('input');
+            const typ = inputs[0]?.value.trim(), reg = inputs[1]?.value.trim(), pct = inputs[2]?.value.trim();
+            if (typ) lines.push(`  ${typ}${reg?' ('+reg+')':''}: ${pct||'?'}%`);
+        });
+        lines.push('');
+    }
+
+    // A
+    const ammoLines = [];
+    AMMO_TYPES.forEach(typ => {
+        const el = document.getElementById('ammo_'+typ.replace(/[^a-z0-9]/gi,'_'));
+        const val = el ? el.value.trim() : '';
+        if (val && val !== '0') ammoLines.push(`  ${typ}: ${val}`);
+    });
+    if (ammoLines.length) { lines.push('A – AMMUNITION (BEHOV)'); lines.push(...ammoLines); lines.push(''); }
+
+    // R
+    const repDivs = document.getElementById('repLista').children;
+    if (repDivs.length) {
+        lines.push('R – REPARATIONER');
+        Array.from(repDivs).forEach(c => {
+            const inputs = c.querySelectorAll('input'); const sel = c.querySelector('select');
+            const typ = inputs[0]?.value.trim(), reg = inputs[1]?.value.trim(), rep = inputs[2]?.value.trim();
+            const korbar = sel ? sel.value : '';
+            if (typ||rep) lines.push(`  ${typ||'?'}${reg?' ('+reg+')':''}: ${rep||'—'} | Körbar: ${korbar}`);
+        });
+        lines.push('');
+    }
+
+    // S
+    lines.push('S – SAMLAD FÖRMÅGA');
+    lines.push(svSelected >= 0 ? SV_LABELS[svSelected] : '(ej angett)');
+    const mot = v('s_motivering');
+    if (mot) lines.push(mot);
+
+    document.getElementById('reportOutput').textContent = lines.join('\n');
+    document.getElementById('formView').classList.add('hidden');
+    document.getElementById('resultView').classList.add('active');
+    window.scrollTo(0,0);
+}
+
+function copyReport() {
+    const text = document.getElementById('reportOutput').textContent;
+    if (navigator.clipboard?.writeText) navigator.clipboard.writeText(text).then(showFeedback).catch(()=>fallbackCopy(text));
+    else fallbackCopy(text);
+}
+function fallbackCopy(text) {
+    const ta=document.createElement('textarea');ta.value=text;ta.style.cssText='position:fixed;opacity:0';
+    document.body.appendChild(ta);ta.select();try{document.execCommand('copy');}catch(_){}
+    document.body.removeChild(ta);showFeedback();
+}
+function showFeedback(){const el=document.getElementById('copyFeedback');el.classList.remove('show');void el.offsetWidth;el.classList.add('show');}
+function backToEdit(){document.getElementById('formView').classList.remove('hidden');document.getElementById('resultView').classList.remove('active');}
+function resetForm(){if(!confirm('Nollställ?'))return;location.reload();}
+
+document.addEventListener('DOMContentLoaded',()=>{
+    initAmmo();
+    addFordon();
+});
+if('serviceWorker' in navigator)navigator.serviceWorker.register('service-worker.js');
+
+// ── Feedback-länk ──────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+    const a = document.createElement('a');
+    a.href = 'https://github.com/gitjoda71/faltrapport/issues/new?title=%5BBeta-Feedback%5D%20PEDARS&body=**Form%3A**%20PEDARS%0A%0A**Beskriv%20problemet%2Ff%C3%B6rslaget%3A**%0A%0A**Telefon%3A**';
+    a.target = '_blank'; a.rel = 'noopener noreferrer';
+    a.textContent = 'Bugg eller förslag? Lämna feedback →';
+    a.style.cssText = 'display:block;text-align:center;padding:24px 0 12px;font-size:0.7rem;color:#5a7a5a;text-decoration:none';
+    const c = document.querySelector('.container');
+    if (c) c.appendChild(a);
+});
+</script>
+</body>
+</html>

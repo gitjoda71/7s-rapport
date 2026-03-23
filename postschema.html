@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0d1f0d">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="POSTSCHEMA">
+    <title>POSTSCHEMA – Vaktschema</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary:#0d1f0d;--bg-secondary:#152815;--bg-card:#1a321a;--bg-input:#0f240f;
+            --border:#2d4a2d;--border-focus:#4a7c4a;--text-primary:#e8f0e8;--text-secondary:#8aaa8a;
+            --text-muted:#5a7a5a;--accent:#4caf50;--accent-hover:#66bb6a;--accent-dim:#1e3d1e;
+            --danger:#c62828;--danger-hover:#e53935;--info:#1565c0;--info-hover:#1976d2;
+            --radius:8px;--radius-sm:4px;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg-primary); color: var(--text-primary); min-height: 100vh; padding: 16px; }
+        .container { max-width: 560px; margin: 0 auto; }
+
+        .topbar { display: flex; align-items: center; gap: 12px; padding: 12px 0 16px; }
+        .back-btn { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: var(--radius-sm); background: var(--bg-secondary); border: 1px solid var(--border); color: var(--text-secondary); text-decoration: none; font-size: 1.1rem; flex-shrink: 0; transition: background 0.15s, color 0.15s; }
+        .back-btn:hover { background: var(--bg-card); color: var(--text-primary); }
+        .topbar-title h1 { font-size: 1.4rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); }
+        .topbar-title p { font-size: 0.72rem; color: var(--text-muted); letter-spacing: 0.06em; margin-top: 2px; }
+
+        .tab-nav { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px; margin-bottom: 16px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius); padding: 4px; }
+        .tab-link { text-align: center; padding: 8px 2px; border-radius: var(--radius-sm); color: var(--text-muted); text-decoration: none; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.04em; transition: background 0.15s, color 0.15s; -webkit-tap-highlight-color: transparent; }
+        .tab-link:hover { background: var(--bg-card); color: var(--text-secondary); }
+        .tab-link.active { background: var(--accent-dim); color: var(--accent); }
+
+        .section-label { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .section-letter { width: 32px; height: 32px; border-radius: 50%; background: var(--accent-dim); border: 1px solid var(--accent); color: var(--accent); font-size: 1rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .section-title { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-secondary); }
+        .section-subtitle { font-size: 0.68rem; color: var(--text-muted); margin-top: 1px; }
+
+        .form-group { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 10px; }
+        .form-group.section-group { border-left: 3px solid var(--accent); }
+        .label-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+        label { font-weight: 600; font-size: 0.82rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-secondary); display: block; margin-bottom: 6px; }
+        .sub-label { font-size: 0.75rem; font-weight: 600; color: var(--text-muted); letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 5px; margin-top: 10px; }
+        .field-hint { font-size: 0.72rem; color: var(--text-muted); margin-top: 5px; opacity: 0.75; }
+
+        input[type="text"], input[type="number"], input[type="datetime-local"], textarea {
+            width: 100%; background: var(--bg-input); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-primary); font-family: inherit; font-size: 1rem; padding: 12px 14px; outline: none; transition: border-color 0.15s; -webkit-appearance: none; appearance: none;
+        }
+        input[type="text"]:focus, input[type="number"]:focus, input[type="datetime-local"]:focus, textarea:focus { border-color: var(--border-focus); }
+        input[type="datetime-local"] { color-scheme: dark; }
+        textarea { resize: vertical; min-height: 72px; line-height: 1.5; }
+
+        .input-row { display: flex; gap: 8px; align-items: flex-start; }
+        .input-row input { flex: 1; min-width: 0; }
+
+        .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 12px 20px; border: none; border-radius: var(--radius); font-family: inherit; font-size: 0.95rem; font-weight: 600; letter-spacing: 0.04em; cursor: pointer; transition: background 0.15s, transform 0.1s; -webkit-tap-highlight-color: transparent; }
+        .btn:active { transform: scale(0.97); }
+        .btn-primary { width: 100%; background: var(--accent); color: #fff; margin-top: 8px; font-size: 1rem; }
+        .btn-primary:hover { background: var(--accent-hover); }
+        .btn-sm { min-height: 40px; padding: 8px 14px; border-radius: var(--radius-sm); font-size: 0.85rem; white-space: nowrap; flex-shrink: 0; }
+        .btn-time { background: var(--accent-dim); color: var(--accent); border: none; }
+        .btn-time:hover { background: var(--border-focus); }
+        .btn-copy { width: 100%; background: var(--info); color: #fff; margin-bottom: 12px; }
+        .btn-copy:hover { background: var(--info-hover); }
+        .btn-secondary { flex: 1; background: var(--bg-secondary); color: var(--text-secondary); border: 1px solid var(--border); }
+        .btn-secondary:hover { background: var(--bg-card); color: var(--text-primary); }
+        .btn-danger { flex: 1; background: var(--danger); color: #fff; border: none; }
+        .btn-danger:hover { background: var(--danger-hover); }
+        .btn-add { background: var(--accent-dim); color: var(--accent); border: 1px dashed var(--accent); border-radius: var(--radius-sm); padding: 8px 14px; font-size: 0.82rem; font-weight: 600; cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; transition: background 0.15s; }
+        .btn-add:hover { background: var(--border-focus); }
+        .btn-remove { background: none; border: none; color: var(--text-muted); font-size: 1.1rem; cursor: pointer; padding: 6px 8px; border-radius: var(--radius-sm); flex-shrink: 0; transition: color 0.15s, background 0.15s; }
+        .btn-remove:hover { color: var(--danger-hover); background: rgba(198,40,40,0.1); }
+        .button-group { display: flex; gap: 10px; }
+        .divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+
+        .list-row { display: flex; gap: 8px; align-items: center; margin-bottom: 6px; }
+        .list-row input { flex: 1; min-width: 0; }
+
+        .saved-items { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+        .saved-item { display: inline-flex; align-items: center; gap: 4px; background: var(--accent-dim); color: var(--text-secondary); font-size: 0.78rem; padding: 4px 8px; border-radius: 20px; cursor: pointer; transition: background 0.15s; }
+        .saved-item:hover { background: var(--border-focus); color: var(--text-primary); }
+        .saved-item .del { color: var(--text-muted); font-size: 1rem; line-height: 1; padding: 0 2px; }
+        .saved-item .del:hover { color: var(--danger-hover); }
+
+        .result-view { display: none; }
+        .result-view.active { display: block; }
+        .form-view.hidden { display: none; }
+        .result-header { font-size: 0.8rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); text-align: center; margin-bottom: 12px; }
+        .report-output { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; font-family: 'Courier New', monospace; font-size: 0.92rem; line-height: 1.9; white-space: pre-wrap; color: var(--text-primary); margin-bottom: 14px; }
+        .copy-feedback { text-align: center; color: var(--accent); font-size: 0.85rem; font-weight: 600; height: 24px; opacity: 0; transition: opacity 0.2s; margin-bottom: 12px; }
+        .copy-feedback.show { opacity: 1; }
+
+        .schema-table { width: 100%; border-collapse: collapse; font-size: .82rem; margin-top: 8px; }
+        .schema-table th { background: var(--bg-secondary); color: var(--text-muted); padding: 8px 6px; text-align: left; font-size: .72rem; letter-spacing: .05em; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+        .schema-table td { padding: 7px 6px; border-bottom: 1px solid var(--border); color: var(--text-primary); }
+        .schema-table td:first-child { color: var(--text-muted); font-size: .8rem; white-space: nowrap; }
+        .schema-table tr:nth-child(even) td { background: rgba(255,255,255,.02); }
+        .schema-wrap { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--border); }
+
+        .sov-warn { background: #3e2800; border: 1px solid #e65100; border-radius: var(--radius-sm); padding: 10px 12px; margin-bottom: 10px; font-size: .82rem; color: #ff9800; display: none; }
+
+        #steg2 h2 { color: var(--accent); font-size: 1.1rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 12px; }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <div class="topbar">
+        <a href="index.html" class="back-btn">←</a>
+        <div class="topbar-title">
+            <h1>POSTSCHEMA</h1>
+            <p>Vaktschema-generator</p>
+        </div>
+    </div>
+
+    <nav class="tab-nav">
+        <a href="obslosa.html" class="tab-link">OBSLÖSA</a>
+        <a href="fors.html" class="tab-link">FORS</a>
+        <a href="pedars.html" class="tab-link">PEDARS</a>
+        <a href="postschema.html" class="tab-link active">SCHEMA</a>
+        <a href="eobusare.html" class="tab-link">EOBUSARE</a>
+        <a href="obo.html" class="tab-link">OBO</a>
+        <a href="rassoika.html" class="tab-link">RASSOIKA</a>
+    </nav>
+
+    <main>
+
+    <!-- STEG 1: Inställningar -->
+    <div id="steg1">
+
+        <div class="form-group section-group">
+            <div class="section-label">
+                <div class="section-letter">I</div>
+                <div>
+                    <div class="section-title">Grundinformation</div>
+                    <div class="section-subtitle">Enhet, ansvarig och tidsram</div>
+                </div>
+            </div>
+
+            <label for="enhet">Enhet / Pluton</label>
+            <input type="text" id="enhet" placeholder="Ex: 2. Pluton, 3. Kompaniet" autocomplete="off">
+
+            <label for="sagesman" style="margin-top:12px">Schemaansvarig</label>
+            <input type="text" id="sagesman" placeholder="Ex: Per Johansson, 2a Plut" autocomplete="off">
+            <div class="saved-items" id="savedSagesman"></div>
+
+            <label for="startTid" style="margin-top:12px">Startdatum och tid</label>
+            <div class="input-row">
+                <input type="datetime-local" id="startTid">
+                <button class="btn btn-sm btn-time" onclick="setNu()">Nu</button>
+            </div>
+
+            <div style="display:flex;gap:12px;margin-top:12px">
+                <div style="flex:1">
+                    <label for="skiftLangd">Skiftlängd (timmar)</label>
+                    <input type="number" id="skiftLangd" value="2" min="1" max="12">
+                </div>
+                <div style="flex:1">
+                    <label for="totalTimmar">Antal timmar att schemalägga</label>
+                    <input type="number" id="totalTimmar" value="24" min="4" max="168">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group section-group">
+            <div class="section-label">
+                <div class="section-letter">P</div>
+                <div>
+                    <div class="section-title">Poster</div>
+                    <div class="section-subtitle">Vaktposter som ska bemannas</div>
+                </div>
+            </div>
+            <div id="posterLista"></div>
+            <button class="btn-add" id="addPostBtn" onclick="addPost()">+ Lägg till post</button>
+        </div>
+
+        <div class="form-group section-group">
+            <div class="section-label">
+                <div class="section-letter">S</div>
+                <div>
+                    <div class="section-title">Soldater</div>
+                    <div class="section-subtitle">Personal att schemalägga</div>
+                </div>
+            </div>
+            <div id="soldatLista"></div>
+            <button class="btn-add" id="addSoldatBtn" onclick="addSoldat()">+ Lägg till soldat</button>
+        </div>
+
+        <button class="btn btn-primary" id="genBtn" onclick="genererSchema()">Generera schema</button>
+    </div>
+
+    <!-- STEG 2: Genererat schema -->
+    <div id="steg2" style="display:none">
+        <h2>Vaktschema</h2>
+
+        <div id="schemaContainer"></div>
+
+        <div class="sov-warn" id="sovVarning"></div>
+
+        <button class="btn btn-copy" onclick="kopieraSchema()" style="margin-top:12px">Kopiera schema</button>
+        <div class="copy-feedback" id="copyFeedback">✓ Kopierat</div>
+        <div class="button-group">
+            <button class="btn btn-secondary" onclick="atergaInst()">Ändra inställningar</button>
+            <button class="btn btn-danger" onclick="nollstall()">Nollställ</button>
+        </div>
+    </div>
+
+    </main>
+</div>
+
+<script>
+let soldater = [];
+let poster = [];
+let schema = [];
+
+// ── Sagesman localStorage ────────────────────────────────────────────────────
+const lsGet = k => JSON.parse(localStorage.getItem(k) || '[]');
+const lsSet = (k, v) => localStorage.setItem(k, JSON.stringify(v));
+
+function saveSagesmanIfNew(val) {
+    if (!val) return;
+    let arr = lsGet('sch_sagesman');
+    if (!arr.includes(val)) lsSet('sch_sagesman', [val, ...arr].slice(0, 5));
+    localStorage.setItem('sch_lastSagesman', val);
+    renderSagesman();
+}
+
+function renderSagesman() {
+    const c = document.getElementById('savedSagesman'); c.innerHTML = '';
+    lsGet('sch_sagesman').forEach(s => {
+        const el = document.createElement('span'); el.className = 'saved-item';
+        el.onclick = () => document.getElementById('sagesman').value = s;
+        el.appendChild(document.createTextNode(s));
+        const d = document.createElement('span'); d.className = 'del'; d.textContent = '×';
+        d.onclick = e => { e.stopPropagation(); lsSet('sch_sagesman', lsGet('sch_sagesman').filter(x => x !== s)); renderSagesman(); };
+        el.appendChild(d); c.appendChild(el);
+    });
+}
+
+// ── Dynamiska listor ─────────────────────────────────────────────────────────
+function addPost(value = '') {
+    const lista = document.getElementById('posterLista');
+    const row = document.createElement('div'); row.className = 'list-row';
+    const inp = document.createElement('input'); inp.type = 'text'; inp.placeholder = 'Postnamn (ex: NORRA GRIND)'; inp.value = value;
+    const btn = document.createElement('button'); btn.className = 'btn-remove'; btn.textContent = '×'; btn.type = 'button';
+    btn.onclick = () => lista.removeChild(row);
+    row.appendChild(inp); row.appendChild(btn); lista.appendChild(row);
+    inp.focus();
+}
+
+function addSoldat(value = '') {
+    const lista = document.getElementById('soldatLista');
+    const row = document.createElement('div'); row.className = 'list-row';
+    const inp = document.createElement('input'); inp.type = 'text'; inp.placeholder = 'Namn'; inp.value = value;
+    const btn = document.createElement('button'); btn.className = 'btn-remove'; btn.textContent = '×'; btn.type = 'button';
+    btn.onclick = () => lista.removeChild(row);
+    row.appendChild(inp); row.appendChild(btn); lista.appendChild(row);
+    inp.focus();
+}
+
+// ── Nu-knapp ─────────────────────────────────────────────────────────────────
+function setNu() {
+    const now = new Date(), p = n => String(n).padStart(2, '0');
+    document.getElementById('startTid').value =
+        `${now.getFullYear()}-${p(now.getMonth()+1)}-${p(now.getDate())}T${p(now.getHours())}:${p(now.getMinutes())}`;
+}
+
+// ── Formatera tid ─────────────────────────────────────────────────────────────
+function formatTid(d) {
+    const p = n => String(n).padStart(2, '0');
+    return p(d.getDate()) + '/' + p(d.getMonth()+1) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
+}
+
+// ── Generera schema ───────────────────────────────────────────────────────────
+function genererSchema() {
+    const startTidVal = document.getElementById('startTid').value;
+    if (!startTidVal) { alert('Ange startdatum och tid.'); return; }
+    const startTid = new Date(startTidVal);
+    const skift = parseInt(document.getElementById('skiftLangd').value) || 2;
+    const total = parseInt(document.getElementById('totalTimmar').value) || 24;
+
+    poster = Array.from(document.querySelectorAll('#posterLista input')).map(i => i.value.trim()).filter(Boolean);
+    soldater = Array.from(document.querySelectorAll('#soldatLista input')).map(i => i.value.trim()).filter(Boolean);
+
+    if (!poster.length || !soldater.length) { alert('Lägg till minst en post och en soldat.'); return; }
+
+    saveSagesmanIfNew(document.getElementById('sagesman').value.trim());
+
+    schema = [];
+    const antalSkift = Math.ceil(total / skift);
+    let soldatIndex = 0;
+
+    for (let s = 0; s < antalSkift; s++) {
+        const skiftStart = new Date(startTid.getTime() + s * skift * 3600000);
+        const skiftSlut = new Date(skiftStart.getTime() + skift * 3600000);
+        const tidStr = formatTid(skiftStart) + '–' + formatTid(skiftSlut);
+
+        poster.forEach((post, pi) => {
+            const soldatNamn = soldater[(soldatIndex + pi) % soldater.length];
+            schema.push({ tid: tidStr, post, soldat: soldatNamn, skiftNr: s });
+        });
+        soldatIndex = (soldatIndex + poster.length) % soldater.length;
+    }
+
+    renderSchema();
+    checkSovTid();
+    document.getElementById('steg1').style.display = 'none';
+    document.getElementById('steg2').style.display = 'block';
+    window.scrollTo(0, 0);
+}
+
+function renderSchema() {
+    const luckor = [...new Set(schema.map(s => s.tid))];
+    let html = '<div class="schema-wrap"><table class="schema-table"><thead><tr><th>Tid</th>';
+    poster.forEach(p => html += `<th>${p}</th>`);
+    html += '</tr></thead><tbody>';
+
+    luckor.forEach(tid => {
+        html += `<tr><td>${tid}</td>`;
+        poster.forEach(post => {
+            const entry = schema.find(s => s.tid === tid && s.post === post);
+            html += `<td>${entry ? entry.soldat : '-'}</td>`;
+        });
+        html += '</tr>';
+    });
+    html += '</tbody></table></div>';
+    document.getElementById('schemaContainer').innerHTML = html;
+}
+
+function checkSovTid() {
+    const skift = parseInt(document.getElementById('skiftLangd').value);
+    const totalTid = parseInt(document.getElementById('totalTimmar').value);
+    const varnDiv = document.getElementById('sovVarning');
+    const varningar = [];
+
+    soldater.forEach(s => {
+        const pass = schema.filter(e => e.soldat === s).length;
+        const aktivTid = pass * skift;
+        const vilaTid = totalTid - aktivTid;
+        if (vilaTid < 4) varningar.push(`\u26a0 ${s} beräknas få ${vilaTid}h vila under schemat.`);
+    });
+
+    if (varningar.length) {
+        varnDiv.style.display = 'block';
+        varnDiv.innerHTML = '<strong>Sömnvarning:</strong><br>' + varningar.join('<br>');
+    } else {
+        varnDiv.style.display = 'none';
+    }
+}
+
+function exportSchema() {
+    const enhet = document.getElementById('enhet').value.trim();
+    const sagesman = document.getElementById('sagesman').value.trim();
+    let text = `VAKTSCHEMA – ${enhet || '[enhet saknas]'}\n`;
+    text += `Ansvarig: ${sagesman || '-'}\n\n`;
+
+    const luckor = [...new Set(schema.map(s => s.tid))];
+    luckor.forEach(tid => {
+        text += `${tid}\n`;
+        poster.forEach(post => {
+            const entry = schema.find(s => s.tid === tid && s.post === post);
+            text += `  ${post}: ${entry ? entry.soldat : '-'}\n`;
+        });
+        text += '\n';
+    });
+    return text;
+}
+
+function kopieraSchema() {
+    const text = exportSchema();
+    if (navigator.clipboard?.writeText) {
+        navigator.clipboard.writeText(text).then(showFeedback).catch(() => fallbackCopy(text));
+    } else {
+        fallbackCopy(text);
+    }
+}
+
+function fallbackCopy(text) {
+    const ta = document.createElement('textarea'); ta.value = text; ta.style.cssText = 'position:fixed;opacity:0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); } catch(_) { alert('Kunde inte kopiera. Markera texten manuellt.'); }
+    document.body.removeChild(ta); showFeedback();
+}
+
+function showFeedback() {
+    const el = document.getElementById('copyFeedback'); el.classList.remove('show'); void el.offsetWidth; el.classList.add('show');
+}
+
+function atergaInst() {
+    document.getElementById('steg2').style.display = 'none';
+    document.getElementById('steg1').style.display = 'block';
+    window.scrollTo(0, 0);
+}
+
+function nollstall() {
+    if (!confirm('Nollställ schemat och börja om?')) return;
+    schema = []; poster = []; soldater = [];
+    document.getElementById('enhet').value = '';
+    document.getElementById('skiftLangd').value = '2';
+    document.getElementById('totalTimmar').value = '24';
+    document.getElementById('posterLista').innerHTML = '';
+    document.getElementById('soldatLista').innerHTML = '';
+    document.getElementById('schemaContainer').innerHTML = '';
+    document.getElementById('sovVarning').style.display = 'none';
+    addPost('POST 1'); addPost('POST 2');
+    addSoldat(''); addSoldat(''); addSoldat(''); addSoldat('');
+    document.getElementById('steg2').style.display = 'none';
+    document.getElementById('steg1').style.display = 'block';
+    window.scrollTo(0, 0);
+}
+
+// ── Init ─────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+    renderSagesman();
+    const last = localStorage.getItem('sch_lastSagesman');
+    if (last) document.getElementById('sagesman').value = last;
+    setNu();
+    addPost('POST 1'); addPost('POST 2');
+    addSoldat(''); addSoldat(''); addSoldat(''); addSoldat('');
+});
+
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('service-worker.js');
+
+// ── Feedback-länk ──────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+    const a = document.createElement('a');
+    a.href = 'https://github.com/gitjoda71/faltrapport/issues/new?title=%5BBeta-Feedback%5D%20SCHEMA&body=**Form%3A**%20POSTSCHEMA%0A%0A**Beskriv%20problemet%2Ff%C3%B6rslaget%3A**%0A%0A**Telefon%3A**';
+    a.target = '_blank'; a.rel = 'noopener noreferrer';
+    a.textContent = 'Bugg eller förslag? Lämna feedback →';
+    a.style.cssText = 'display:block;text-align:center;padding:24px 0 12px;font-size:0.7rem;color:#5a7a5a;text-decoration:none';
+    const c = document.querySelector('.container');
+    if (c) c.appendChild(a);
+});
+</script>
+</body>
+</html>
