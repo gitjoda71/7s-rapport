@@ -287,12 +287,16 @@ function updateProgress() {
     document.getElementById('progressBar').style.width = (done / total * 100) + '%';
     document.getElementById('progressText').textContent = done + ' / ' + total + ' steg klara';
 
+    let justCompleted = null;
     checks.forEach(function(c) {
         const step = c.dataset.step;
         const badge = document.getElementById('badge_' + step);
         const card = document.getElementById('step_' + step);
         if (c.checked) {
-            if (!card.classList.contains('done') && navigator.vibrate) navigator.vibrate(50);
+            if (!card.classList.contains('done')) {
+                if (navigator.vibrate) navigator.vibrate(50);
+                justCompleted = parseInt(step);
+            }
             badge.style.display = 'inline';
             card.classList.add('done');
         } else {
@@ -300,6 +304,12 @@ function updateProgress() {
             card.classList.remove('done');
         }
     });
+
+    // Auto-scroll till nästa steg
+    if (justCompleted && justCompleted < total) {
+        const next = document.getElementById('step_' + (justCompleted + 1));
+        if (next) setTimeout(function() { next.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 300);
+    }
 }
 
 function stepChecked(stepNr) {

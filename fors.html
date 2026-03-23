@@ -55,7 +55,7 @@
             width: 100%; background: var(--bg-input); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-primary); font-family: inherit; font-size: 1rem; padding: 12px 14px; outline: none; transition: border-color 0.15s; -webkit-appearance: none;
         }
         input[type="text"]:focus, input[type="datetime-local"]:focus, select:focus, textarea:focus { border-color: var(--border-focus); }
-        textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+        textarea { resize: vertical; min-height: 72px; line-height: 1.5; }
         input[type="datetime-local"] { color-scheme: dark; }
         select option { background: var(--bg-card); }
 
@@ -67,13 +67,14 @@
             background: var(--warn-bg); border: 1px solid var(--warn-border); border-radius: var(--radius-sm);
             padding: 10px 12px; margin-bottom: 10px; display: none;
         }
-        .warn-box.show { display: flex; align-items: flex-start; gap: 8px; }
+        .warn-box.show { display: flex; align-items: flex-start; gap: 8px; animation: warnBlink 1s ease-in-out infinite; }
         .warn-box span { font-size: 0.82rem; color: var(--warn-text); line-height: 1.4; }
+        @keyframes warnBlink { 0%,100%{opacity:1;border-color:var(--warn-border)} 50%{opacity:.6;border-color:#e53935} }
 
         /* Sekretess-toggle */
         .crypto-row { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
         .crypto-row label { text-transform: none; font-size: 0.82rem; font-weight: 500; color: var(--text-muted); letter-spacing: 0; }
-        input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--accent); flex-shrink: 0; cursor: pointer; }
+        input[type="checkbox"] { width: 22px; height: 22px; accent-color: var(--accent); flex-shrink: 0; cursor: pointer; }
 
         .saved-items { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
         .saved-item { display: inline-flex; align-items: center; gap: 4px; background: var(--accent-dim); color: var(--text-secondary); font-size: 0.78rem; padding: 4px 8px; border-radius: 20px; cursor: pointer; transition: background 0.15s; }
@@ -85,7 +86,7 @@
         .btn:active { transform: scale(0.97); }
         .btn-primary { width: 100%; background: var(--accent); color: #fff; margin-top: 8px; font-size: 1rem; }
         .btn-primary:hover { background: var(--accent-hover); }
-        .btn-sm { min-height: 48px; padding: 12px 14px; border-radius: var(--radius-sm); font-size: 0.85rem; white-space: nowrap; flex-shrink: 0; }
+        .btn-sm { min-height: 40px; padding: 8px 14px; border-radius: var(--radius-sm); font-size: 0.85rem; white-space: nowrap; flex-shrink: 0; }
         .btn-time { background: var(--accent-dim); color: var(--accent); }
         .btn-time:hover { background: var(--border-focus); }
         .btn-copy { width: 100%; background: var(--info); color: #fff; margin-bottom: 12px; }

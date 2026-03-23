@@ -97,6 +97,9 @@
         .schema-table { width: 100%; border-collapse: collapse; font-size: .82rem; margin-top: 8px; }
         .schema-table th { background: var(--bg-secondary); color: var(--text-muted); padding: 8px 6px; text-align: left; font-size: .72rem; letter-spacing: .05em; text-transform: uppercase; border-bottom: 1px solid var(--border); }
         .schema-table td { padding: 7px 6px; border-bottom: 1px solid var(--border); color: var(--text-primary); }
+        .schema-table td.swappable { cursor: pointer; border-radius: var(--radius-sm); transition: background .15s; }
+        .schema-table td.swappable:hover { background: var(--accent-dim); }
+        .schema-table td.swappable select { background: var(--bg-input); color: var(--text-primary); border: 1px solid var(--border-focus); border-radius: var(--radius-sm); padding: 4px 6px; font-size: .82rem; font-family: inherit; width: 100%; }
         .schema-table td:first-child { color: var(--text-muted); font-size: .8rem; white-space: nowrap; }
         .schema-table tr:nth-child(even) td { background: rgba(255,255,255,.02); }
         .schema-wrap { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--border); }
@@ -319,11 +322,12 @@ function renderSchema() {
     poster.forEach(p => html += `<th>${p}</th>`);
     html += '</tr></thead><tbody>';
 
-    luckor.forEach(tid => {
+    luckor.forEach((tid, ti) => {
         html += `<tr><td>${tid}</td>`;
-        poster.forEach(post => {
+        poster.forEach((post, pi) => {
             const entry = schema.find(s => s.tid === tid && s.post === post);
-            html += `<td>${entry ? entry.soldat : '-'}</td>`;
+            const idx = schema.indexOf(entry);
+            html += `<td class="swappable" onclick="swapCell(this,${idx})">${entry ? entry.soldat : '-'}</td>`;
         });
         html += '</tr>';
     });
@@ -350,6 +354,28 @@ function checkSovTid() {
     } else {
         varnDiv.style.display = 'none';
     }
+}
+
+function swapCell(td, idx) {
+    if (td.querySelector('select')) return; // redan öppen
+    const current = schema[idx]?.soldat || '';
+    const sel = document.createElement('select');
+    soldater.forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s; opt.textContent = s;
+        if (s === current) opt.selected = true;
+        sel.appendChild(opt);
+    });
+    td.textContent = '';
+    td.appendChild(sel);
+    sel.focus();
+    function commit() {
+        schema[idx].soldat = sel.value;
+        renderSchema();
+        checkSovTid();
+    }
+    sel.addEventListener('change', commit);
+    sel.addEventListener('blur', commit);
 }
 
 function exportSchema() {

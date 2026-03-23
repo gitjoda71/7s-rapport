@@ -641,7 +641,7 @@ function renderSaved(cid, items, inputId, delFn) {
 function deleteSavedPlace(v)    { set('7s_places',   get('7s_places').filter(x=>x!==v));   loadSavedItems(); }
 function deleteSavedSagesman(v) { set('7s_sagesman', get('7s_sagesman').filter(x=>x!==v)); loadSavedItems(); }
 
-document.addEventListener('DOMContentLoaded', () => { loadSavedItems(); loadLastSagesman(); });
+document.addEventListener('DOMContentLoaded', () => { loadSavedItems(); loadLastSagesman(); setCurrentTime(); });
 
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('service-worker.js');
 

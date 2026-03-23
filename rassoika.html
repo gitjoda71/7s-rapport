@@ -113,6 +113,18 @@
         .report-output { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; font-family: 'Courier New', monospace; font-size: 0.92rem; line-height: 1.9; white-space: pre-wrap; color: var(--text-primary); margin-bottom: 14px; }
         .copy-feedback { text-align: center; color: var(--accent); font-size: 0.85rem; font-weight: 600; height: 24px; opacity: 0; transition: opacity 0.2s; margin-bottom: 12px; }
         .copy-feedback.show { opacity: 1; }
+
+        /* Export toggle */
+        .export-toggle { display: flex; gap: 0; margin-bottom: 14px; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+        .export-toggle button { flex: 1; padding: 12px 8px; border: none; background: var(--bg-secondary); color: var(--text-muted); font-family: inherit; font-size: 0.82rem; font-weight: 700; letter-spacing: 0.06em; cursor: pointer; transition: background 0.15s, color 0.15s; }
+        .export-toggle button.active { background: var(--accent-dim); color: var(--accent); }
+
+        /* Read overlay (fullscreen) */
+        .read-overlay { display: none; position: fixed; inset: 0; z-index: 9999; background: #000; color: #e8f0e8; padding: 24px 18px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+        .read-overlay.active { display: block; }
+        .read-close { position: fixed; top: 12px; right: 16px; z-index: 10000; background: rgba(255,255,255,.12); border: none; color: #fff; font-size: 2rem; width: 48px; height: 48px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .read-overlay-content { font-size: 32px; line-height: 1.6; white-space: pre-wrap; padding-top: 48px; }
+        .btn-read { width: 100%; background: #1a237e; color: #fff; margin-bottom: 12px; border: none; }
     </style>
 </head>
 <body>
@@ -369,16 +381,21 @@
             </div>
         </details>
 
-        <button class="btn btn-primary" onclick="generateReport()">Generera statuskvitto</button>
+        <button class="btn btn-primary" onclick="generateReport()">Generera rapport</button>
 
     </div><!-- /form-view -->
 
     <!-- RESULT VIEW -->
     <div class="result-view" id="resultView">
-        <div class="result-header">Statuskvitto genererat</div>
+        <div class="export-toggle" id="exportToggle">
+            <button class="active" onclick="showExport('kvitto')">Statuskvitto</button>
+            <button onclick="showExport('order')">Patrullorder</button>
+        </div>
+        <div class="result-header" id="resultHeader">Statuskvitto genererat</div>
         <button class="btn btn-copy" onclick="copyReport()">Kopiera text</button>
         <div class="copy-feedback" id="copyFeedback">Kopierat!</div>
         <pre class="report-output" id="reportOutput"></pre>
+        <button class="btn btn-read" id="btnRead" onclick="enterReadMode()" style="display:none">L&auml;s upp (fullsk&auml;rm)</button>
         <div class="button-group">
             <button class="btn btn-secondary" onclick="goBack()">&#8592; &Auml;ndra</button>
             <button class="btn btn-danger flex1" onclick="clearAll()">&Rensa allt</button>
@@ -387,6 +404,12 @@
     </div>
 
 </div><!-- /container -->
+
+<!-- Read-mode overlay (outside container) -->
+<div class="read-overlay" id="readOverlay">
+    <button class="read-close" onclick="exitReadMode()">&times;</button>
+    <div class="read-overlay-content" id="readOverlayContent"></div>
+</div>
 
 <script>
 // ============================================================
@@ -507,8 +530,11 @@ function updateProgress() {
 // ============================================================
 // GENERERA RAPPORT
 // ============================================================
-function generateReport() {
-    // Patrullens sammansättning
+let currentExportMode = 'kvitto';
+let cachedKvitto = '';
+let cachedOrder = '';
+
+function generateKvitto() {
     const patrullMedl = Array.from(document.getElementById('patrullLista').children).map(c => {
         const inp = c.querySelector('input');
         const sel = c.querySelector('select');
@@ -516,9 +542,9 @@ function generateReport() {
     }).filter(Boolean);
 
     const lines = [
-        'KVITTO: PATRULL UTG\u00c5ENDE',
+        'KVITTO: PATRULL UTGÅENDE',
         `TNR:           ${v('tnr') || '-'}`,
-        `Utg\u00e5ngstid:    ${v('an_stund') || '-'}`,
+        `Utgångstid:    ${v('an_stund') || '-'}`,
         `Styrka:        ${patrullMedl.length || '?'} pers`,
         '',
         'Sammansättning:',
@@ -527,13 +553,11 @@ function generateReport() {
     if (v('a_stf_namn')) lines.push(`Stf: ${v('a_stf_namn')}`);
     lines.push('');
 
-    // Lösen
-    if (v('o_los1') || v('o_los2')) lines.push(`L\u00f6sen: ${v('o_los1').toUpperCase() || '?'} \u2013 ${v('o_los2').toUpperCase() || '?'}`);
-    if (v('an_till')) lines.push(`Anm\u00e4lt till: ${v('an_till')}`);
+    if (v('o_los1') || v('o_los2')) lines.push(`Lösen: ${v('o_los1').toUpperCase() || '?'} – ${v('o_los2').toUpperCase() || '?'}`);
+    if (v('an_till')) lines.push(`Anmält till: ${v('an_till')}`);
     lines.push('');
 
-    // Stegstatus
-    const stegNamn = ['R-Repetera', 'A-Avdela', 'S-Samla', 'S-Stridsberedskap', 'O-Orientera', 'I-Indela', 'K-Kontrollera', 'A-Anm\u00e4l'];
+    const stegNamn = ['R-Repetera', 'A-Avdela', 'S-Samla', 'S-Stridsberedskap', 'O-Orientera', 'I-Indela', 'K-Kontrollera', 'A-Anmäl'];
     const stegStatus = [
         document.getElementById('r_rep')?.checked,
         document.getElementById('a_stf_check')?.checked,
@@ -547,10 +571,108 @@ function generateReport() {
     lines.push('Stegstatus:');
     stegNamn.forEach((n, i) => lines.push(`  ${stegStatus[i] ? '\u2713' : '\u2717'} ${n}`));
 
-    document.getElementById('reportOutput').textContent = lines.join('\n');
+    return lines.join('\n');
+}
+
+function generateOrder() {
+    const lines = ['PATRULLORDER', ''];
+    if (v('tnr')) lines.push(`TNR: ${v('tnr')}`);
+    lines.push('');
+
+    // R – Uppgift
+    if (v('r_uppgift') || v('r_plan')) {
+        lines.push('UPPGIFT:');
+        if (v('r_uppgift')) lines.push(v('r_uppgift'));
+        if (v('r_plan')) { lines.push(''); lines.push('Plan:'); lines.push(v('r_plan')); }
+        lines.push('');
+    }
+
+    // O – Orientering (main content)
+    lines.push('ORIENTERING:');
+    if (v('o_fiende')) { lines.push('Fienden:'); lines.push(v('o_fiende')); lines.push(''); }
+    if (v('o_egna')) { lines.push('Egna förband:'); lines.push(v('o_egna')); lines.push(''); }
+    if (v('o_uppgift')) { lines.push('Uppgift & lösningsidé:'); lines.push(v('o_uppgift')); lines.push(''); }
+    if (v('o_inpass')) { lines.push('In- och utpassering:'); lines.push(v('o_inpass')); lines.push(''); }
+    if (v('o_los1') || v('o_los2')) lines.push(`Lösen: ${v('o_los1').toUpperCase()} – ${v('o_los2').toUpperCase()}`);
+    if (v('o_samb_tecken')) { lines.push('Egna tecken:'); lines.push(v('o_samb_tecken')); lines.push(''); }
+    if (v('o_atersaml')) { lines.push('Återsamlingsplatser:'); lines.push(v('o_atersaml')); lines.push(''); }
+
+    // I – Indelning
+    const indelningar = Array.from(document.getElementById('indelaLista').children).map(c => {
+        const inputs = c.querySelectorAll('input');
+        const namn = inputs[0]?.value.trim() || '';
+        const uppg = inputs[1]?.value.trim() || '';
+        return namn ? `${namn}: ${uppg}` : null;
+    }).filter(Boolean);
+    if (indelningar.length) {
+        lines.push('INDELNING:');
+        indelningar.forEach(i => lines.push(`  ${i}`));
+        if (v('i_uppsikt')) lines.push(`Uppsikt: ${v('i_uppsikt')}`);
+        lines.push('');
+    }
+
+    // Sammansättning
+    const patrullMedl = Array.from(document.getElementById('patrullLista').children).map(c => {
+        const inp = c.querySelector('input');
+        const sel = c.querySelector('select');
+        return inp?.value.trim() ? `${inp.value.trim()} (${sel?.value || ''})` : null;
+    }).filter(Boolean);
+    if (patrullMedl.length) {
+        lines.push('SAMMANSÄTTNING:');
+        patrullMedl.forEach(m => lines.push(`  ${m}`));
+        if (v('a_stf_namn')) lines.push(`  Stf: ${v('a_stf_namn')}`);
+        lines.push('');
+    }
+
+    return lines.join('\n');
+}
+
+function generateReport() {
+    cachedKvitto = generateKvitto();
+    cachedOrder = generateOrder();
+    currentExportMode = 'kvitto';
+    document.getElementById('reportOutput').textContent = cachedKvitto;
+    document.getElementById('resultHeader').textContent = 'Statuskvitto genererat';
+    document.getElementById('btnRead').style.display = 'none';
+    // Reset toggle buttons
+    var btns = document.querySelectorAll('#exportToggle button');
+    btns[0].classList.add('active');
+    btns[1].classList.remove('active');
+
     document.getElementById('formView').classList.add('hidden');
     document.getElementById('resultView').classList.add('active');
     window.scrollTo(0, 0);
+}
+
+function showExport(mode) {
+    currentExportMode = mode;
+    var btns = document.querySelectorAll('#exportToggle button');
+    if (mode === 'kvitto') {
+        btns[0].classList.add('active');
+        btns[1].classList.remove('active');
+        document.getElementById('reportOutput').textContent = cachedKvitto;
+        document.getElementById('resultHeader').textContent = 'Statuskvitto genererat';
+        document.getElementById('btnRead').style.display = 'none';
+    } else {
+        btns[1].classList.add('active');
+        btns[0].classList.remove('active');
+        document.getElementById('reportOutput').textContent = cachedOrder;
+        document.getElementById('resultHeader').textContent = 'Patrullorder genererad';
+        document.getElementById('btnRead').style.display = 'block';
+    }
+}
+
+// ============================================================
+// READ MODE (fullscreen)
+// ============================================================
+function enterReadMode() {
+    document.getElementById('readOverlayContent').textContent = cachedOrder;
+    document.getElementById('readOverlay').classList.add('active');
+    requestWakeLock();
+}
+function exitReadMode() {
+    document.getElementById('readOverlay').classList.remove('active');
+    releaseWakeLock();
 }
 
 // ============================================================
@@ -609,10 +731,8 @@ async function requestWakeLock() {
 function releaseWakeLock() {
     if (wakeLock) { wakeLock.release().catch(()=>{}); wakeLock = null; }
 }
-const _origGenerateReport = generateReport;
-generateReport = function() { _origGenerateReport(); requestWakeLock(); };
 const _origGoBack = goBack;
-goBack = function() { releaseWakeLock(); _origGoBack(); };
+goBack = function() { releaseWakeLock(); exitReadMode(); _origGoBack(); };
 
 // ============================================================
 // SERVICE WORKER
