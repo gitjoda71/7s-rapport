@@ -1,7 +1,19 @@
-const CACHE = '7s-v1';
+const CACHE = 'hv-v2';
 const FILES = [
+  './',
   './index.html',
-  './manifest.json'
+  './manifest.json',
+  './obslosa.html',
+  './fors.html',
+  './pedars.html',
+  './postschema.html',
+  './eobusare.html',
+  './obo.html',
+  './rassoika.html',
+  './what.html',
+  './scrim.html',
+  './weft.html',
+  './ah.html'
 ];
 
 self.addEventListener('install', e => {
