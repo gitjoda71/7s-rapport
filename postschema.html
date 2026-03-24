@@ -241,6 +241,7 @@
 let soldater = [];
 let poster = [];
 let schema = [];
+let soldatMinVila = {}; // namn → min vilotid i h (0 = ingen krav)
 
 // ── Sagesman localStorage ────────────────────────────────────────────────────
 const lsGet = k => JSON.parse(localStorage.getItem(k) || '[]');
@@ -281,9 +282,14 @@ function addSoldat(value = '', doFocus = true) {
     const lista = document.getElementById('soldatLista');
     const row = document.createElement('div'); row.className = 'list-row';
     const inp = document.createElement('input'); inp.type = 'text'; inp.placeholder = 'Namn'; inp.value = value;
+    const sel = document.createElement('select');
+    sel.style.cssText = 'width:auto;flex-shrink:0;padding:12px 8px;font-size:0.8rem;';
+    [['', '–'], ['6', 'Förare'], ['8', 'RPAS']].forEach(([v, t]) => {
+        const o = document.createElement('option'); o.value = v; o.textContent = t; sel.appendChild(o);
+    });
     const btn = document.createElement('button'); btn.className = 'btn-remove'; btn.textContent = '×'; btn.type = 'button';
     btn.onclick = () => lista.removeChild(row);
-    row.appendChild(inp); row.appendChild(btn); lista.appendChild(row);
+    row.appendChild(inp); row.appendChild(sel); row.appendChild(btn); lista.appendChild(row);
     if (doFocus) inp.focus();
 }
 
@@ -315,7 +321,14 @@ function genererSchema() {
     const total = parseInt(document.getElementById('totalTimmar').value) || 36;
 
     poster = Array.from(document.querySelectorAll('#posterLista input')).map(i => i.value.trim()).filter(Boolean);
-    soldater = Array.from(document.querySelectorAll('#soldatLista input')).map(i => i.value.trim()).filter(Boolean);
+    const soldatRows = Array.from(document.querySelectorAll('#soldatLista .list-row'));
+    soldater = soldatRows.map(r => r.querySelector('input').value.trim()).filter(Boolean);
+    soldatMinVila = {};
+    soldatRows.forEach(r => {
+        const namn = r.querySelector('input').value.trim();
+        const roll = r.querySelector('select')?.value;
+        if (namn) soldatMinVila[namn] = roll ? parseInt(roll) : 0;
+    });
 
     if (!poster.length || !soldater.length) { alert('Lägg till minst en post och en soldat.'); return; }
 
@@ -430,10 +443,13 @@ function checkSovTid() {
     const varningar = [];
 
     soldater.forEach(s => {
+        const minVila = soldatMinVila[s] || 0;
+        if (minVila === 0) return; // Standard – ingen krav
         const pass = schema.filter(e => e.soldat === s).length;
         const aktivTid = pass * skift;
         const vilaTid = totalTid - aktivTid;
-        if (vilaTid < 4) varningar.push(`\u26a0 ${s} beräknas få ${vilaTid}h vila under schemat.`);
+        const rollNamn = minVila === 6 ? 'Förare' : 'RPAS';
+        if (vilaTid < minVila) varningar.push(`\u26a0 ${s} (${rollNamn}) beräknas få ${vilaTid}h vila – krav: ${minVila}h ostörd vila.`);
     });
 
     if (varningar.length) {
