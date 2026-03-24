@@ -348,9 +348,12 @@ function genererSchema() {
                         ? soldater.filter(sol => !soldatMinVila[sol])
                         : soldater;
 
-    // Specialsoldater tar POST1 under sista specialPool.length skiften
-    // Math.max(0,...) undviker negativt specialStart om schemat är mycket kort
-    const specialStart = Math.max(0, antalSkift - specialPool.length);
+    // Uteslut specialsoldater om schemat är kortare än deras vilokrav
+    // (de behöver vila >= minVila timmar → kräver minRestShifts skift → ryms ej om >= antalSkift)
+    const schedulableSpecials = specialPool.filter(sol =>
+        Math.ceil(soldatMinVila[sol] / skift) < antalSkift
+    );
+    const specialStart = Math.max(0, antalSkift - schedulableSpecials.length);
 
     // Spåra senast aktivt skift per soldat (för "mest utvilad"-urvalet)
     const lastFinished = {};
@@ -379,9 +382,9 @@ function genererSchema() {
         const busyNow = new Set(pipeline.slice(0, N - 1));
 
         let nyPerson;
-        if (specialPool.length > 0 && s >= specialStart && (s - specialStart) < specialPool.length) {
+        if (schedulableSpecials.length > 0 && s >= specialStart && (s - specialStart) < schedulableSpecials.length) {
             // Specialsoldat in exakt när vilokravet är uppfyllt
-            nyPerson = specialPool[s - specialStart];
+            nyPerson = schedulableSpecials[s - specialStart];
         } else {
             // Välj ordinarie soldat med längst vila som inte är i pipelinen nu
             const candidates = activePool.filter(sol => !busyNow.has(sol));
