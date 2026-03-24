@@ -275,21 +275,11 @@ const MGRS = (() => {
     return { forward };
 })();
 
-async function applyGPSPosition(pos) {
+function applyGPSPosition(pos) {
     const { latitude: lat, longitude: lon } = pos.coords;
     const mgrs = MGRS.forward(lat, lon);
-    let desc = '';
-    try {
-        const r = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=sv`);
-        const d = await r.json(); const a = d.address || {};
-        const name = a.amenity || a.leisure || a.building || '';
-        const street = a.road ? (a.road + (a.house_number ? ' ' + a.house_number : '')) : '';
-        const area = a.suburb || a.neighbourhood || a.city_district || '';
-        desc = [name, street, area].filter(Boolean).join(', ');
-    } catch (_) {}
-    const result = desc ? `${mgrs}, ${desc}` : mgrs;
     const field = document.getElementById('stalle');
-    field.value = field.value ? field.value + ', ' + result : result;
+    field.value = field.value ? field.value + ', ' + mgrs : mgrs;
 }
 function gpsErrorMessage(err) {
     if (err.code === 1) return 'Platsåtkomst nekad – tillåt i webbläsarens inställningar och ladda om sidan.';

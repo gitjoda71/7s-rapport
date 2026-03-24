@@ -466,15 +466,8 @@ async function getGPS() {
     navigator.geolocation.getCurrentPosition(async pos => {
         const {latitude: lat, longitude: lon} = pos.coords;
         const mgrs = MGRS.forward(lat, lon);
-        let desc = '';
-        try {
-            const r = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=sv`);
-            const d = await r.json(); const a = d.address || {};
-            const parts = [a.road||(a.amenity||''), a.suburb||a.city_district||''].filter(Boolean);
-            desc = parts.join(', ');
-        } catch(_) {}
         const f = document.getElementById('plats');
-        f.value = desc ? `${mgrs}, ${desc}` : mgrs;
+        f.value = mgrs;
         done();
     }, () => done(), {enableHighAccuracy: true, timeout: 20000, maximumAge: 30000});
 }
