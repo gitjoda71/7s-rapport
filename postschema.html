@@ -339,9 +339,10 @@ function genererSchema() {
 
     // Pooler: ordinarie roterar, special (förare/RPAS) läggs sist i kön
     const regularPool = soldater.filter(sol => !soldatMinVila[sol]);
-    const specialPool = soldater.filter(sol => soldatMinVila[sol] > 0);
+    // Sortera special stigande efter vilokrav → minst restriktiv in FÖRST, mest restriktiv SIST
+    const specialPool = soldater.filter(sol => soldatMinVila[sol] > 0)
+                                .sort((a, b) => soldatMinVila[a] - soldatMinVila[b]);
     const activePool  = regularPool.length >= N ? regularPool : soldater;
-    const fullPool    = [...activePool, ...specialPool];
 
     // Specialsoldater tar POST1 under sista specialPool.length skiften
     const specialStart = antalSkift - specialPool.length;
@@ -350,13 +351,13 @@ function genererSchema() {
     const lastFinished = {};
     soldater.forEach(sol => { lastFinished[sol] = -Infinity; });
 
-    // Initialisera pipeline: sista N ur fullPool
-    // → special hamnar i pipeline → deras vila räknas från slot 0
+    // Initialisera pipeline från ordinarie pool
+    // → specialsoldater startar med lastFinished=-Infinity → får full vila från schema-start
     const pipeline = [];
     for (let i = 0; i < N; i++) {
-        const sol = fullPool[(fullPool.length - 1 - i + fullPool.length) % fullPool.length];
+        const sol = activePool[(activePool.length - 1 - i + activePool.length) % activePool.length];
         pipeline.push(sol);
-        lastFinished[sol] = -i; // pipeline[0] "klar" vid slot 0, pipeline[1] vid slot -1 osv.
+        if (i < N - 1) lastFinished[sol] = 0; // dessa gör faktiskt POST2..POSTN vid slot 0
     }
 
     let currentTime = new Date(startTid.getTime());
