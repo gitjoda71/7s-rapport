@@ -27,16 +27,16 @@
         body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg-primary); color: var(--text-primary); min-height: 100vh; padding: 16px; }
         .container { max-width: 560px; margin: 0 auto; }
 
-        .topbar { display: flex; align-items: center; gap: 12px; padding: 12px 0 16px; }
-        .back-btn { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: var(--radius-sm); background: var(--bg-secondary); border: 1px solid var(--border); color: var(--text-secondary); text-decoration: none; font-size: 1.1rem; flex-shrink: 0; transition: background 0.15s, color 0.15s; }
-        .back-btn:hover { background: var(--bg-card); color: var(--text-primary); }
-        .topbar-title h1 { font-size: 1.4rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); }
-        .topbar-title p { font-size: 0.72rem; color: var(--text-muted); letter-spacing: 0.06em; margin-top: 2px; }
+        header { text-align: center; padding: 20px 0 16px; }
+        header h1 { font-size: 1.4rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); }
+        header p { font-size: 0.72rem; color: var(--text-muted); letter-spacing: 0.06em; margin-top: 2px; }
 
-        .tab-nav { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px; margin-bottom: 16px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius); padding: 4px; }
-        .tab-link { text-align: center; padding: 8px 2px; border-radius: var(--radius-sm); color: var(--text-muted); text-decoration: none; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.04em; transition: background 0.15s, color 0.15s; -webkit-tap-highlight-color: transparent; }
+        .tab-nav { display: flex; gap: 4px; margin-bottom: 4px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius); padding: 4px; }
+        .tab-link { flex: 1; text-align: center; padding: 9px 2px; border-radius: var(--radius-sm); color: var(--text-muted); text-decoration: none; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.05em; transition: background 0.15s, color 0.15s; -webkit-tap-highlight-color: transparent; }
         .tab-link:hover { background: var(--bg-card); color: var(--text-secondary); }
         .tab-link.active { background: var(--accent-dim); color: var(--accent); }
+        .tab-nav-sub { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; margin-bottom: 16px; background: var(--bg-secondary); border: 1px solid var(--border); border-top: none; border-radius: 0 0 var(--radius) var(--radius); padding: 3px 4px 4px; }
+        .tab-nav-sub .tab-link { font-size: 0.62rem; padding: 6px 2px; letter-spacing: 0.04em; }
 
         .section-label { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
         .section-letter { width: 32px; height: 32px; border-radius: 50%; background: var(--accent-dim); border: 1px solid var(--accent); color: var(--accent); font-size: 1rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
@@ -110,15 +110,16 @@
 <body>
 <div class="container">
 
-    <div class="topbar">
-        <a href="index.html" class="back-btn">←</a>
-        <div class="topbar-title">
-            <h1>FORS</h1>
-            <p>Lägesrapport</p>
-        </div>
-    </div>
+    <header><h1>FORS</h1><p>Lägesrapport</p></header>
 
     <nav class="tab-nav">
+        <a href="index.html" class="tab-link">7S</a>
+        <a href="what.html" class="tab-link">WHAT</a>
+        <a href="scrim.html" class="tab-link">SCRIM</a>
+        <a href="weft.html" class="tab-link">WEFT</a>
+        <a href="ah.html" class="tab-link">A–H</a>
+    </nav>
+    <nav class="tab-nav-sub">
         <a href="obslosa.html" class="tab-link">OBSLÖSA</a>
         <a href="fors.html" class="tab-link active">FORS</a>
         <a href="pedars.html" class="tab-link">PEDARS</a>

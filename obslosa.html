@@ -44,43 +44,16 @@
         }
         .container { max-width: 560px; margin: 0 auto; }
 
-        /* Topbar */
-        .topbar {
-            display: flex; align-items: center; gap: 12px;
-            padding: 12px 0 16px;
-        }
-        .back-btn {
-            display: flex; align-items: center; justify-content: center;
-            width: 36px; height: 36px; border-radius: var(--radius-sm);
-            background: var(--bg-secondary); border: 1px solid var(--border);
-            color: var(--text-secondary); text-decoration: none; font-size: 1.1rem;
-            flex-shrink: 0; transition: background 0.15s, color 0.15s;
-        }
-        .back-btn:hover { background: var(--bg-card); color: var(--text-primary); }
-        .topbar-title h1 {
-            font-size: 1.4rem; font-weight: 700;
-            letter-spacing: 0.12em; text-transform: uppercase;
-            color: var(--accent);
-        }
-        .topbar-title p { font-size: 0.72rem; color: var(--text-muted); letter-spacing: 0.06em; margin-top: 2px; }
+        header { text-align: center; padding: 20px 0 16px; }
+        header h1 { font-size: 1.4rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); }
+        header p { font-size: 0.72rem; color: var(--text-muted); letter-spacing: 0.06em; margin-top: 2px; }
 
-        /* Tab nav (2 rader) */
-        .tab-nav {
-            display: grid; grid-template-columns: repeat(4, 1fr);
-            gap: 3px; margin-bottom: 16px;
-            background: var(--bg-secondary); border: 1px solid var(--border);
-            border-radius: var(--radius); padding: 4px;
-        }
-        .tab-nav-row2 { grid-template-columns: repeat(3, 1fr); }
-        .tab-link {
-            text-align: center; padding: 8px 2px;
-            border-radius: var(--radius-sm); color: var(--text-muted);
-            text-decoration: none; font-size: 0.7rem; font-weight: 700;
-            letter-spacing: 0.04em; transition: background 0.15s, color 0.15s;
-            -webkit-tap-highlight-color: transparent;
-        }
+        .tab-nav { display: flex; gap: 4px; margin-bottom: 4px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius); padding: 4px; }
+        .tab-link { flex: 1; text-align: center; padding: 9px 2px; border-radius: var(--radius-sm); color: var(--text-muted); text-decoration: none; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.05em; transition: background 0.15s, color 0.15s; -webkit-tap-highlight-color: transparent; }
         .tab-link:hover { background: var(--bg-card); color: var(--text-secondary); }
         .tab-link.active { background: var(--accent-dim); color: var(--accent); }
+        .tab-nav-sub { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; margin-bottom: 16px; background: var(--bg-secondary); border: 1px solid var(--border); border-top: none; border-radius: 0 0 var(--radius) var(--radius); padding: 3px 4px 4px; }
+        .tab-nav-sub .tab-link { font-size: 0.62rem; padding: 6px 2px; letter-spacing: 0.04em; }
 
         /* Sektionstitel */
         .section-label {
@@ -228,7 +201,7 @@
         /* Print styles */
         @media print {
             body { background: #fff; color: #000; padding: 0; font-size: 12pt; }
-            .topbar, .tab-nav, .form-view, .copy-feedback,
+            header, .tab-nav, .tab-nav-sub, .form-view, .copy-feedback,
             .btn-copy, .btn-print, .button-group { display: none !important; }
             .result-view { display: block !important; }
             .result-header { color: #000; }
@@ -242,17 +215,16 @@
 <body>
 <div class="container">
 
-    <!-- Topbar -->
-    <div class="topbar">
-        <a href="index.html" class="back-btn" title="Tillbaka">←</a>
-        <div class="topbar-title">
-            <h1>O.B.S.L.Ö.S.A</h1>
-            <p>Postinstruktion</p>
-        </div>
-    </div>
+    <header><h1>OBSLÖSA</h1><p>Postinstruktion</p></header>
 
-    <!-- Navigering till övriga nya formulär -->
     <nav class="tab-nav">
+        <a href="index.html" class="tab-link">7S</a>
+        <a href="what.html" class="tab-link">WHAT</a>
+        <a href="scrim.html" class="tab-link">SCRIM</a>
+        <a href="weft.html" class="tab-link">WEFT</a>
+        <a href="ah.html" class="tab-link">A–H</a>
+    </nav>
+    <nav class="tab-nav-sub">
         <a href="obslosa.html" class="tab-link active">OBSLÖSA</a>
         <a href="fors.html" class="tab-link">FORS</a>
         <a href="pedars.html" class="tab-link">PEDARS</a>
