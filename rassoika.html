@@ -117,12 +117,6 @@
         .export-toggle button { flex: 1; padding: 12px 8px; border: none; background: var(--bg-secondary); color: var(--text-muted); font-family: inherit; font-size: 0.82rem; font-weight: 700; letter-spacing: 0.06em; cursor: pointer; transition: background 0.15s, color 0.15s; }
         .export-toggle button.active { background: var(--accent-dim); color: var(--accent); }
 
-        /* Read overlay (fullscreen) */
-        .read-overlay { display: none; position: fixed; inset: 0; z-index: 9999; background: #000; color: #e8f0e8; padding: 24px 18px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-        .read-overlay.active { display: block; }
-        .read-close { position: fixed; top: 12px; right: 16px; z-index: 10000; background: rgba(255,255,255,.12); border: none; color: #fff; font-size: 2rem; width: 48px; height: 48px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        .read-overlay-content { font-size: 32px; line-height: 1.6; white-space: pre-wrap; padding-top: 48px; }
-        .btn-read { width: 100%; background: #1a237e; color: #fff; margin-bottom: 12px; border: none; }
     </style>
 </head>
 <body>
@@ -351,7 +345,6 @@
         <button class="btn btn-copy" onclick="copyReport()">Kopiera text</button>
         <div class="copy-feedback" id="copyFeedback">Kopierat!</div>
         <pre class="report-output" id="reportOutput"></pre>
-        <button class="btn btn-read" id="btnRead" onclick="enterReadMode()" style="display:none">L&auml;s upp (fullsk&auml;rm)</button>
         <div class="button-group">
             <button class="btn btn-secondary" onclick="goBack()">&#8592; &Auml;ndra</button>
             <button class="btn btn-danger flex1" onclick="clearAll()">&Rensa allt</button>
@@ -361,11 +354,6 @@
 
 </div><!-- /container -->
 
-<!-- Read-mode overlay (outside container) -->
-<div class="read-overlay" id="readOverlay">
-    <button class="read-close" onclick="exitReadMode()">&times;</button>
-    <div class="read-overlay-content" id="readOverlayContent"></div>
-</div>
 
 <script>
 // ============================================================
@@ -553,7 +541,6 @@ function generateReport() {
     currentExportMode = 'kvitto';
     document.getElementById('reportOutput').textContent = cachedKvitto;
     document.getElementById('resultHeader').textContent = 'Statuskvitto genererat';
-    document.getElementById('btnRead').style.display = 'none';
     // Reset toggle buttons
     var btns = document.querySelectorAll('#exportToggle button');
     btns[0].classList.add('active');
@@ -572,27 +559,12 @@ function showExport(mode) {
         btns[1].classList.remove('active');
         document.getElementById('reportOutput').textContent = cachedKvitto;
         document.getElementById('resultHeader').textContent = 'Statuskvitto genererat';
-        document.getElementById('btnRead').style.display = 'none';
-    } else {
+        } else {
         btns[1].classList.add('active');
         btns[0].classList.remove('active');
         document.getElementById('reportOutput').textContent = cachedOrder;
         document.getElementById('resultHeader').textContent = 'Patrullorder genererad';
-        document.getElementById('btnRead').style.display = 'block';
     }
-}
-
-// ============================================================
-// READ MODE (fullscreen)
-// ============================================================
-function enterReadMode() {
-    document.getElementById('readOverlayContent').textContent = cachedOrder;
-    document.getElementById('readOverlay').classList.add('active');
-    requestWakeLock();
-}
-function exitReadMode() {
-    document.getElementById('readOverlay').classList.remove('active');
-    releaseWakeLock();
 }
 
 // ============================================================
@@ -636,20 +608,6 @@ document.addEventListener('DOMContentLoaded', function() {
     addIndela();
 });
 
-// ============================================================
-// WAKE LOCK – håller skärmen på vid kvittovisning
-// ============================================================
-let wakeLock = null;
-async function requestWakeLock() {
-    if ('wakeLock' in navigator) {
-        try { wakeLock = await navigator.wakeLock.request('screen'); } catch(_) {}
-    }
-}
-function releaseWakeLock() {
-    if (wakeLock) { wakeLock.release().catch(()=>{}); wakeLock = null; }
-}
-const _origGoBack = goBack;
-goBack = function() { releaseWakeLock(); exitReadMode(); _origGoBack(); };
 
 // ============================================================
 // SERVICE WORKER

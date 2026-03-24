@@ -189,14 +189,6 @@
         }
         .copy-feedback.show { opacity: 1; }
 
-        /* Muntlig order – fullskärm */
-        .read-overlay { display:none; position:fixed; inset:0; z-index:9999; background:#000; padding:24px 20px; overflow-y:auto; }
-        .read-overlay.active { display:block; }
-        .read-overlay pre { font-family:'Courier New',monospace; font-size:clamp(24px,5vw,40px); line-height:1.7; color:#e8f0e8; white-space:pre-wrap; word-break:break-word; }
-        .read-close { position:fixed; top:12px; right:16px; z-index:10000; background:rgba(255,255,255,.15); border:none; color:#fff; font-size:1.6rem; width:44px; height:44px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; }
-        .read-close:hover { background:rgba(255,255,255,.3); }
-        .btn-read { width:100%; background:#1a321a; color:var(--accent); border:2px solid var(--accent); margin-bottom:12px; min-height:48px; padding:12px 20px; border-radius:var(--radius); font-family:inherit; font-size:0.95rem; font-weight:600; cursor:pointer; }
-        .btn-read:hover { background:var(--accent-dim); }
 
         /* Print styles */
         @media print {
@@ -386,7 +378,6 @@
         <div class="result-header">Postinstruktion klar</div>
         <div class="report-output" id="reportOutput"></div>
         <button class="btn btn-copy" onclick="copyReport()">Kopiera till urklipp</button>
-        <button class="btn btn-read" onclick="enterReadMode()">&#128266; Muntlig order &ndash; fullsk&auml;rm</button>
         <button class="btn btn-print" onclick="window.print()">Skriv ut / Spara PDF</button>
         <div class="copy-feedback" id="copyFeedback">✓ Kopierat</div>
         <div class="button-group">
@@ -397,10 +388,6 @@
     </main>
 </div>
 
-<!-- FULLSKÄRM MUNTLIG ORDER -->
-<div class="read-overlay" id="readOverlay">
-    <button class="read-close" onclick="exitReadMode()" title="St&auml;ng">&#10005;</button>
-    <pre id="readContent"></pre>
 </div>
 
 <script>
@@ -528,23 +515,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setNow();
 });
 
-// ── Muntlig order – fullskärm ────────────────────────────────────────────────
-let wakeLock = null;
-async function requestWakeLock() {
-    if ('wakeLock' in navigator) {
-        try { wakeLock = await navigator.wakeLock.request('screen'); } catch(_) {}
-    }
-}
-function enterReadMode() {
-    const text = document.getElementById('reportOutput').textContent;
-    document.getElementById('readContent').textContent = text;
-    document.getElementById('readOverlay').classList.add('active');
-    requestWakeLock();
-}
-function exitReadMode() {
-    document.getElementById('readOverlay').classList.remove('active');
-    if (wakeLock) { wakeLock.release().catch(()=>{}); wakeLock = null; }
-}
+
 
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('service-worker.js');
 
