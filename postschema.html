@@ -108,6 +108,20 @@
 
         #steg2 h2 { color: var(--accent); font-size: 1.1rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 12px; }
 
+        /* ── Gantt ─────────────────────────────────────────────────── */
+        .gantt-title { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-secondary); margin: 18px 0 8px; }
+        .gantt-wrap { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+        .gantt-header { display: flex; border-bottom: 1px solid var(--border); }
+        .gantt-header-label { width: 80px; flex-shrink: 0; border-right: 1px solid var(--border); background: var(--bg-secondary); }
+        .gantt-ticks { flex: 1; position: relative; height: 22px; background: var(--bg-secondary); overflow: hidden; }
+        .gantt-tick { position: absolute; font-size: 0.58rem; color: var(--text-muted); top: 4px; transform: translateX(-50%); white-space: nowrap; }
+        .gantt-tick-line { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--border); transform: translateX(-50%); }
+        .gantt-row { display: flex; align-items: stretch; border-bottom: 1px solid var(--border); min-height: 34px; }
+        .gantt-row:last-child { border-bottom: none; }
+        .gantt-label { width: 80px; flex-shrink: 0; padding: 6px 8px; font-size: 0.68rem; font-weight: 600; color: var(--text-muted); background: var(--bg-secondary); display: flex; align-items: center; letter-spacing: 0.04em; text-transform: uppercase; border-right: 1px solid var(--border); word-break: break-word; }
+        .gantt-track { flex: 1; position: relative; background: var(--bg-card); }
+        .gantt-bar { position: absolute; top: 4px; bottom: 4px; border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 0.62rem; font-weight: 700; color: #fff; overflow: hidden; white-space: nowrap; padding: 0 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.4); }
+
     </style>
 </head>
 <body>
@@ -208,6 +222,8 @@
         <h2>Vaktschema</h2>
 
         <div id="schemaContainer"></div>
+
+        <div id="ganttContainer"></div>
 
         <button class="btn btn-copy" onclick="kopieraSchema()" style="margin-top:12px">Kopiera schema</button>
         <div class="copy-feedback" id="copyFeedback">✓ Kopierat</div>
@@ -419,6 +435,56 @@ function renderSchema() {
     });
     html += '</tbody></table></div>';
     document.getElementById('schemaContainer').innerHTML = html;
+    renderGantt();
+}
+
+function renderGantt() {
+    if (!schema.length) return;
+
+    const minMs = Math.min(...schema.map(s => s.startMs));
+    const maxMs = Math.max(...schema.map(s => s.endMs));
+    const totalMs = maxMs - minMs;
+
+    const palette = ['#4caf50','#2196f3','#ff9800','#e91e63','#9c27b0','#00bcd4','#cddc39','#ff5722','#03a9f4','#8bc34a'];
+    const soldatColors = {};
+    soldater.forEach((s, i) => { soldatColors[s] = palette[i % palette.length]; });
+
+    const tickMs = 3600000;
+    const firstTick = Math.ceil(minMs / tickMs) * tickMs;
+    const ticks = [];
+    for (let t = firstTick; t <= maxMs; t += tickMs) {
+        const pct = ((t - minMs) / totalMs) * 100;
+        const d = new Date(t);
+        const p = n => String(n).padStart(2,'0');
+        ticks.push({ pct, label: p(d.getDate()) + p(d.getHours()) });
+    }
+
+    let html = '<div class="gantt-title">GANTT – TIDSLINJE</div><div class="gantt-wrap">';
+    html += '<div class="gantt-header"><div class="gantt-header-label"></div><div class="gantt-ticks">';
+    ticks.forEach(t => {
+        html += `<div class="gantt-tick-line" style="left:${t.pct.toFixed(2)}%"></div>`;
+        html += `<div class="gantt-tick" style="left:${t.pct.toFixed(2)}%">${t.label}</div>`;
+    });
+    html += '</div></div>';
+
+    poster.forEach(post => {
+        html += '<div class="gantt-row">';
+        html += `<div class="gantt-label">${post}</div>`;
+        html += '<div class="gantt-track">';
+        ticks.forEach(t => {
+            html += `<div style="position:absolute;top:0;bottom:0;left:${t.pct.toFixed(2)}%;width:1px;background:var(--border);opacity:0.4"></div>`;
+        });
+        schema.filter(e => e.post === post).forEach(entry => {
+            const left = ((entry.startMs - minMs) / totalMs) * 100;
+            const width = ((entry.endMs - entry.startMs) / totalMs) * 100;
+            const color = soldatColors[entry.soldat] || '#4caf50';
+            html += `<div class="gantt-bar" style="left:${left.toFixed(2)}%;width:${width.toFixed(2)}%;background:${color}" title="${entry.tid}: ${entry.soldat}">${entry.soldat}</div>`;
+        });
+        html += '</div></div>';
+    });
+
+    html += '</div>';
+    document.getElementById('ganttContainer').innerHTML = html;
 }
 
 function swapCell(td, idx) {
