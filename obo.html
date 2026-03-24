@@ -114,14 +114,6 @@
         @keyframes fieldFlash { 0%{box-shadow:0 0 0 0 rgba(76,175,80,.5)} 50%{box-shadow:0 0 0 4px rgba(76,175,80,.3)} 100%{box-shadow:none} }
         .field-flash { animation: fieldFlash .6s ease-out; }
 
-        /* Läs upp – fullskärm */
-        .read-overlay { display:none; position:fixed; inset:0; z-index:9999; background:#000; padding:24px 20px; overflow-y:auto; }
-        .read-overlay.active { display:block; }
-        .read-overlay pre { font-family:'Courier New',monospace; font-size:clamp(24px,5vw,40px); line-height:1.7; color:#e8f0e8; white-space:pre-wrap; word-break:break-word; }
-        .read-close { position:fixed; top:12px; right:16px; z-index:10000; background:rgba(255,255,255,.15); border:none; color:#fff; font-size:1.6rem; width:44px; height:44px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; }
-        .read-close:hover { background:rgba(255,255,255,.3); }
-        .btn-read { width:100%; background:#1a321a; color:var(--accent); border:2px solid var(--accent); margin-bottom:12px; }
-        .btn-read:hover { background:var(--accent-dim); }
     </style>
 </head>
 <body>
@@ -278,7 +270,6 @@
     <div class="result-view" id="resultView">
         <div class="result-header">Order genererad</div>
         <button class="btn btn-copy" onclick="copyReport()">Kopiera text</button>
-        <button class="btn btn-read" onclick="enterReadMode()">&#128266; L&auml;s upp &ndash; fullsk&auml;rm</button>
         <div class="copy-feedback" id="copyFeedback">Kopierat!</div>
         <pre class="report-output" id="reportOutput"></pre>
         <div class="button-group">
@@ -289,12 +280,6 @@
     </div>
 
 </div><!-- /container -->
-
-<!-- FULLSKÄRM LÄSVY -->
-<div class="read-overlay" id="readOverlay">
-    <button class="read-close" onclick="exitReadMode()" title="St&auml;ng">&#10005;</button>
-    <pre id="readContent"></pre>
-</div>
 
 <script>
 // ============================================================
@@ -479,10 +464,10 @@ function parsePUK() {
     // Dela texten i sektioner baserat på vanliga rubriker
     const sectionPatterns = [
         { key: 'ori',  re: /(?:^|\n)\s*(?:1[\.\):]?\s*)?(?:ORIENTERING|ORI)\s*[:\-]?\s*\n/i },
-        { key: 'bes',  re: /(?:^|\n)\s*(?:2[\.\):]?\s*)?(?:BESLUT|VERKSAMHETSID[EÉ]|GFI)\s*[:\-]?\s*\n/i },
-        { key: 'ord',  re: /(?:^|\n)\s*(?:3[\.\):]?\s*)?(?:ORDER|UPPGIFTER|KOMMANDO)\s*[:\-]?\s*\n/i },
-        { key: 'und',  re: /(?:^|\n)\s*(?:4[\.\):]?\s*)?(?:UNDERH[AÅ]LL|UTH[AÅ]LLIGHET)\s*[:\-]?\s*\n/i },  // end-marker only
-        { key: 'led',  re: /(?:^|\n)\s*(?:5[\.\):]?\s*)?(?:LEDNING|SAMBAND)\s*[:\-]?\s*\n/i }              // end-marker only
+        { key: 'upp',  re: /(?:^|\n)\s*(?:2[\.\):]?\s*)?(?:V[ÅA]R\s+UPPGIFT|UPPGIFT)\s*[:\-]?\s*\n/i },
+        { key: 'gen',  re: /(?:^|\n)\s*(?:3[\.\):]?\s*)?(?:GENOMF[ÖO]RANDE|BESLUT|VERKSAMHETSID[ÉE])\s*[:\-]?\s*\n/i },
+        { key: 'log',  re: /(?:^|\n)\s*(?:4[\.\):]?\s*)?(?:LOGISTIK|UNDERH[ÅA]LL|UTH[ÅA]LLIGHET)\s*[:\-]?\s*\n/i },
+        { key: 'led',  re: /(?:^|\n)\s*(?:5[\.\):]?\s*)?(?:LEDNING|SAMBAND)\s*[:\-]?\s*\n/i }
     ];
 
     // Hitta positioner
@@ -523,6 +508,11 @@ function parsePUK() {
         return '';
     }
 
+    // ── VÅR UPPGIFT (sektion 2 i PlutO) ──
+    if (sections.upp) {
+        fillField('o_var_uppgift', sections.upp);
+    }
+
     // ── ORIENTERING ──
     if (sections.ori) {
         const t = sections.ori;
@@ -551,8 +541,8 @@ function parsePUK() {
     }
 
     // ── BESLUT ──
-    if (sections.bes) {
-        const t = sections.bes;
+    if (sections.gen || sections.bes) {
+        const t = sections.gen || sections.bes;
         fillField('b_malb', extract(t, [
             /(?:M[aå]lbild)\s*[:\-]\s*([\s\S]*?)(?=\n\s*(?:Inled|GFI|D[aä]refter|Slutligen|RIL|$))/i
         ]));
@@ -569,8 +559,8 @@ function parsePUK() {
             /(?:RIL|Riktlinjer)\s*[:\-]\s*([\s\S]*?)$/im
         ]));
         // Fallback: om inga sub-rubriker, lägg allt i GFI inledning
-        if (!v('b_inled') && !v('b_malb') && sections.bes.length > 5) {
-            fillField('b_inled', sections.bes);
+        if (!v('b_inled') && !v('b_malb') && t.length > 5) {
+            fillField('b_inled', t);
         }
     }
 
@@ -627,6 +617,27 @@ function parsePUK() {
         }
     }
 
+    // ── LOGISTIK (sektion 4) – sjukvård → skadeplatsen ──
+    if (sections.log) {
+        const t = sections.log;
+        fillField('o_skadeplats', extract(t, [
+            /(?:Sjukv[åa]rd(?:stj[äa]nst)?|Skadeplatsen?)\s*[:\-]\s*([\s\S]*?)(?=\n\s*(?:Underh|$))/i,
+            /^([\s\S]+?)(?=\n\s*(?:Underh|$))/i
+        ]));
+    }
+
+    // ── LEDNING (sektion 5) ──
+    if (sections.led) {
+        const t = sections.led;
+        fillField('o_samband', extract(t, [
+            /(?:Samband)\s*[:\-]\s*([\s\S]*?)(?=\n\s*(?:Plutch|Chefen|Stf|$))/i
+        ]));
+        fillField('o_chef_pos', extract(t, [
+            /(?:Plutch|Chefen?|Stf)\s*[:\-]?\s*([\s\S]*?)(?=\n\s*(?:Samband|$))/i,
+            /(?:leder\s+fr[åa]n)\s*([\s\S]*?)(?=\n|$)/i
+        ]));
+    }
+
     // Feedback
     const fb = document.getElementById('importFeedback');
     if (filled > 0) {
@@ -638,20 +649,6 @@ function parsePUK() {
     }
     fb.classList.add('show');
     setTimeout(() => fb.classList.remove('show'), 4000);
-}
-
-// ============================================================
-// FULLSKÄRM LÄSVY
-// ============================================================
-function enterReadMode() {
-    const text = document.getElementById('reportOutput').textContent;
-    document.getElementById('readContent').textContent = text;
-    document.getElementById('readOverlay').classList.add('active');
-    requestWakeLock();
-}
-
-function exitReadMode() {
-    document.getElementById('readOverlay').classList.remove('active');
 }
 
 // ============================================================
