@@ -105,7 +105,6 @@
         .schema-table tr:nth-child(even) td { background: rgba(255,255,255,.02); }
         .schema-wrap { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--border); }
 
-        .sov-warn { background: #3e2800; border: 1px solid #e65100; border-radius: var(--radius-sm); padding: 10px 12px; margin-bottom: 10px; font-size: .82rem; color: #ff9800; display: none; }
 
         #steg2 h2 { color: var(--accent); font-size: 1.1rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 12px; }
 
@@ -225,7 +224,6 @@
 
         <div id="ganttContainer"></div>
 
-        <div class="sov-warn" id="sovVarning"></div>
 
         <button class="btn btn-copy" onclick="kopieraSchema()" style="margin-top:12px">Kopiera schema</button>
         <div class="copy-feedback" id="copyFeedback">✓ Kopierat</div>
@@ -339,20 +337,26 @@ function genererSchema() {
     const antalSkift = Math.ceil(total / skift);
     const N = poster.length;
 
-    // Trappstegsrotation: ordinarie soldater roterar, specialroller (förare/RPAS) läggs sist
-    const regularPool = soldater.filter(s => !soldatMinVila[s]);
-    const specialPool = soldater.filter(s => soldatMinVila[s] > 0);
-    const activePool  = regularPool.length >= N ? regularPool : soldater; // fallback om alla är special
+    // Pooler: ordinarie roterar, special (förare/RPAS) läggs sist i kön
+    const regularPool = soldater.filter(sol => !soldatMinVila[sol]);
+    const specialPool = soldater.filter(sol => soldatMinVila[sol] > 0);
+    const activePool  = regularPool.length >= N ? regularPool : soldater;
     const fullPool    = [...activePool, ...specialPool];
 
-    // Specialsoldater tar POST1 under de sista specialPool.length skiften
+    // Specialsoldater tar POST1 under sista specialPool.length skiften
     const specialStart = antalSkift - specialPool.length;
 
-    // Initialisera pipeline med de sista N personerna ur fullPool
-    // pipeline[0] → används som POST2, pipeline[1] → POST3, osv.
+    // Spåra senast aktivt skift per soldat (för "mest utvilad"-urvalet)
+    const lastFinished = {};
+    soldater.forEach(sol => { lastFinished[sol] = -Infinity; });
+
+    // Initialisera pipeline: sista N ur fullPool
+    // → special hamnar i pipeline → deras vila räknas från slot 0
     const pipeline = [];
     for (let i = 0; i < N; i++) {
-        pipeline.push(fullPool[(fullPool.length - 1 - i + fullPool.length) % fullPool.length]);
+        const sol = fullPool[(fullPool.length - 1 - i + fullPool.length) % fullPool.length];
+        pipeline.push(sol);
+        lastFinished[sol] = -i; // pipeline[0] "klar" vid slot 0, pipeline[1] vid slot -1 osv.
     }
 
     let currentTime = new Date(startTid.getTime());
@@ -362,27 +366,39 @@ function genererSchema() {
         currentTime = new Date(currentTime.getTime() + skift * 3600000);
         const tidStr = formatTid(skiftStart) + '–' + formatTid(currentTime);
 
-        // Ny soldat kliver in i POST1 varje skift
+        const busyNow = new Set(pipeline.slice(0, N - 1));
+
         let nyPerson;
         if (specialPool.length > 0 && s >= specialStart && (s - specialStart) < specialPool.length) {
+            // Specialsoldat in exakt när vilokravet är uppfyllt
             nyPerson = specialPool[s - specialStart];
         } else {
-            nyPerson = activePool[s % activePool.length];
+            // Välj ordinarie soldat med längst vila som inte är i pipelinen nu
+            const candidates = activePool.filter(sol => !busyNow.has(sol));
+            candidates.sort((a, b) => {
+                const la = lastFinished[a], lb = lastFinished[b];
+                if (la === lb) return activePool.indexOf(a) - activePool.indexOf(b);
+                if (la === -Infinity) return -1; // a aldrig schemaglagd → mest utvilad
+                if (lb === -Infinity) return 1;
+                return la - lb; // lägre lastFinished = mer utvilad
+            });
+            nyPerson = candidates[0] || activePool.find(sol => !busyNow.has(sol)) || activePool[0];
         }
 
-        // Tilldela poster: POST1=nyPerson, POST2=pipeline[0], POST3=pipeline[1] ...
+        // Tilldela poster: POST1=nyPerson, POST2=pipeline[0], POST3=pipeline[1] …
         poster.forEach((post, pi) => {
             const soldatNamn = pi === 0 ? nyPerson : (pipeline[pi - 1] || nyPerson);
             schema.push({ tid: tidStr, startMs: skiftStart.getTime(), endMs: currentTime.getTime(), post, soldat: soldatNamn, skiftNr: s });
         });
 
-        // Förflytta pipeline
+        // nyPerson är aktiv t.o.m. slot s + N - 1 (POST1 nu, POST2 nästa skift, osv.)
+        lastFinished[nyPerson] = s + N - 1;
+
         pipeline.unshift(nyPerson);
         if (pipeline.length > N) pipeline.length = N;
     }
 
     renderSchema();
-    checkSovTid();
     document.getElementById('steg1').style.display = 'none';
     document.getElementById('steg2').style.display = 'block';
     window.scrollTo(0, 0);
@@ -463,38 +479,6 @@ function renderGantt() {
     document.getElementById('ganttContainer').innerHTML = html;
 }
 
-function checkSovTid() {
-    const skift = parseInt(document.getElementById('skiftLangd').value);
-    const varnDiv = document.getElementById('sovVarning');
-    const varningar = [];
-
-    // Alla unika skiftnummer i ordning
-    const alleSkift = [...new Set(schema.map(e => e.skiftNr))].sort((a, b) => a - b);
-
-    soldater.forEach(s => {
-        const minVila = soldatMinVila[s] || 0;
-        if (minVila === 0) return; // Standard – ingen krav
-
-        const aktivaSkift = new Set(schema.filter(e => e.soldat === s).map(e => e.skiftNr));
-
-        // Räkna max sammanhängande lediga skift
-        let maxFria = 0, raka = 0;
-        alleSkift.forEach(sn => {
-            if (!aktivaSkift.has(sn)) { raka++; maxFria = Math.max(maxFria, raka); }
-            else raka = 0;
-        });
-        const maxVilaH = maxFria * skift;
-        const rollNamn = minVila === 6 ? 'Förare' : 'RPAS';
-        if (maxVilaH < minVila) varningar.push(`\u26a0 ${s} (${rollNamn}) max sammanhängande vila: ${maxVilaH}h – krav: ${minVila}h.`);
-    });
-
-    if (varningar.length) {
-        varnDiv.style.display = 'block';
-        varnDiv.innerHTML = '<strong>Sömnvarning:</strong><br>' + varningar.join('<br>');
-    } else {
-        varnDiv.style.display = 'none';
-    }
-}
 
 function swapCell(td, idx) {
     if (td.querySelector('select')) return; // redan öppen
@@ -512,7 +496,6 @@ function swapCell(td, idx) {
     function commit() {
         schema[idx].soldat = sel.value;
         renderSchema();
-        checkSovTid();
     }
     sel.addEventListener('change', commit);
     sel.addEventListener('blur', commit);
@@ -572,7 +555,7 @@ function nollstall() {
     document.getElementById('posterLista').innerHTML = '';
     document.getElementById('soldatLista').innerHTML = '';
     document.getElementById('schemaContainer').innerHTML = '';
-    document.getElementById('sovVarning').style.display = 'none';
+
     addPost('POST 1', false); addPost('POST 2', false);
     addSoldat('', false); addSoldat('', false); addSoldat('', false); addSoldat('', false);
     document.getElementById('steg2').style.display = 'none';
