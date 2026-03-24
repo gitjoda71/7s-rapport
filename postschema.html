@@ -342,10 +342,15 @@ function genererSchema() {
     // Sortera special stigande efter vilokrav → minst restriktiv in FÖRST, mest restriktiv SIST
     const specialPool = soldater.filter(sol => soldatMinVila[sol] > 0)
                                 .sort((a, b) => soldatMinVila[a] - soldatMinVila[b]);
-    const activePool  = regularPool.length >= N ? regularPool : soldater;
+    // Fallback: om för få ordinarie, använd alla MINUS special (undviker dubbelschemaläggning)
+    const activePool  = regularPool.length >= N ? regularPool
+                      : soldater.filter(sol => !soldatMinVila[sol]).length >= 1
+                        ? soldater.filter(sol => !soldatMinVila[sol])
+                        : soldater;
 
     // Specialsoldater tar POST1 under sista specialPool.length skiften
-    const specialStart = antalSkift - specialPool.length;
+    // Math.max(0,...) undviker negativt specialStart om schemat är mycket kort
+    const specialStart = Math.max(0, antalSkift - specialPool.length);
 
     // Spåra senast aktivt skift per soldat (för "mest utvilad"-urvalet)
     const lastFinished = {};
@@ -405,6 +410,14 @@ function genererSchema() {
     window.scrollTo(0, 0);
 }
 
+// Visa namn med rollsuffix: (F) för Förare, (R) för RPAS
+function displayNamn(namn) {
+    const v = soldatMinVila[namn];
+    if (v === 6) return namn + ' (F)';
+    if (v === 8) return namn + ' (R)';
+    return namn;
+}
+
 function renderSchema() {
     const luckor = [...new Set(schema.map(s => s.tid))];
     let html = '<div class="schema-wrap"><table class="schema-table"><thead><tr><th>Tid</th>';
@@ -416,7 +429,7 @@ function renderSchema() {
         poster.forEach((post, pi) => {
             const entry = schema.find(s => s.tid === tid && s.post === post);
             const idx = schema.indexOf(entry);
-            html += `<td class="swappable" onclick="swapCell(this,${idx})">${entry ? entry.soldat : '-'}</td>`;
+            html += `<td class="swappable" onclick="swapCell(this,${idx})">${entry ? displayNamn(entry.soldat) : '-'}</td>`;
         });
         html += '</tr>';
     });
@@ -471,7 +484,7 @@ function renderGantt() {
             const left = ((entry.startMs - minMs) / totalMs) * 100;
             const width = ((entry.endMs - entry.startMs) / totalMs) * 100;
             const color = soldatColors[entry.soldat] || '#4caf50';
-            html += `<div class="gantt-bar" style="left:${left.toFixed(2)}%;width:${width.toFixed(2)}%;background:${color}" title="${entry.tid}: ${entry.soldat}">${entry.soldat}</div>`;
+            html += `<div class="gantt-bar" style="left:${left.toFixed(2)}%;width:${width.toFixed(2)}%;background:${color}" title="${entry.tid}: ${displayNamn(entry.soldat)}">${displayNamn(entry.soldat)}</div>`;
         });
         html += '</div></div>';
     });
@@ -513,7 +526,7 @@ function exportSchema() {
         text += `${tid}\n`;
         poster.forEach(post => {
             const entry = schema.find(s => s.tid === tid && s.post === post);
-            text += `  ${post}: ${entry ? entry.soldat : '-'}\n`;
+            text += `  ${post}: ${entry ? displayNamn(entry.soldat) : '-'}\n`;
         });
         text += '\n';
     });
