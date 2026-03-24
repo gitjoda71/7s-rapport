@@ -348,6 +348,11 @@ function genererSchema() {
         }
     });
 
+    // Soldater vars viloblock täcker hela schemat schemaläggas aldrig
+    const aldrigSchema = new Set(
+        soldater.filter(s => { const b = viloBlock[s]; return b && (b.end - b.start) >= antalSkift; })
+    );
+
     let currentTime = new Date(startTid.getTime());
     let assignIdx = 0;
 
@@ -359,13 +364,17 @@ function genererSchema() {
         currentTime = skiftSlut; // nästa skift börjar exakt där detta slutar
         const tidStr = formatTid(skiftStart) + '–' + formatTid(skiftSlut);
 
-        // Eligible = inte i viloblock
+        // Eligible = inte i viloblock och inte i aldrigSchema
         const eligible = soldater.filter(sol => {
+            if (aldrigSchema.has(sol)) return false;
             const b = viloBlock[sol];
             return !b || s < b.start || s >= b.end;
         });
-        // Fallback om för få soldater täcker posterna
-        const pool = eligible.length >= poster.length ? eligible : soldater;
+        // Fallback exkluderar alltid aldrigSchema-soldater
+        const fallback = soldater.filter(sol => !aldrigSchema.has(sol));
+        const pool = eligible.length >= poster.length ? eligible
+                   : fallback.length >= poster.length ? fallback
+                   : soldater; // absolut sista utväg
 
         poster.forEach((post, pi) => {
             const soldatNamn = pool[(assignIdx + pi) % pool.length];
