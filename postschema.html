@@ -379,10 +379,12 @@ function genererSchema() {
                    : fallback.length >= poster.length ? fallback
                    : soldater; // absolut sista utväg
 
-        // Rotera soldater i block, inte varje skift → längre sammanhängande vilotid
+        // Rotera soldater i block → sammanhängande vila
+        // Inom blocket roteras postordningen → varje soldat rör sig mellan poster
         const blockNum = Math.floor(s / blockSize);
+        const postOffset = s % poster.length; // rotera poster inom blocket
         poster.forEach((post, pi) => {
-            const soldatNamn = pool[(blockNum * poster.length + pi) % pool.length];
+            const soldatNamn = pool[(blockNum * poster.length + (pi + postOffset) % poster.length) % pool.length];
             schema.push({ tid: tidStr, startMs: skiftStart.getTime(), endMs: skiftSlut.getTime(), post, soldat: soldatNamn, skiftNr: s });
         });
     }
