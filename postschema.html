@@ -223,6 +223,8 @@
 
         <div id="schemaContainer"></div>
 
+        <div id="specialControls"></div>
+
         <div id="ganttContainer"></div>
 
         <button class="btn btn-copy" onclick="kopieraSchema()" style="margin-top:12px">Kopiera schema</button>
@@ -241,6 +243,8 @@ let soldater = [];
 let poster = [];
 let schema = [];
 let soldatMinVila = {}; // namn → min vilotid i h (0 = ingen krav)
+let specialFrontSet = new Set(); // specialsoldater som ska placeras FRAM istället för bak
+let schedulableSpecials = []; // fylls i genererSchema, används i renderSchema
 
 // ── Sagesman localStorage ────────────────────────────────────────────────────
 const lsGet = k => JSON.parse(localStorage.getItem(k) || '[]');
@@ -349,11 +353,25 @@ function genererSchema() {
                         : soldater;
 
     // Uteslut specialsoldater om schemat är kortare än deras vilokrav
-    // (de behöver vila >= minVila timmar → kräver minRestShifts skift → ryms ej om >= antalSkift)
-    const schedulableSpecials = specialPool.filter(sol =>
+    schedulableSpecials = specialPool.filter(sol =>
         Math.ceil(soldatMinVila[sol] / skift) < antalSkift
     );
-    const specialStart = Math.max(0, antalSkift - schedulableSpecials.length);
+
+    // Bygg slot-karta: front-soldater → tidigast möjliga slot, back-soldater → sista slot
+    const frontSpecials = schedulableSpecials.filter(sol => specialFrontSet.has(sol))
+        .sort((a, b) => soldatMinVila[a] - soldatMinVila[b]);
+    const backSpecials  = schedulableSpecials.filter(sol => !specialFrontSet.has(sol));
+
+    const specialSlots = new Map();
+    let nextFront = 0;
+    frontSpecials.forEach(sol => {
+        const earliest = Math.ceil(soldatMinVila[sol] / skift);
+        const slot = Math.max(earliest, nextFront);
+        specialSlots.set(sol, slot);
+        nextFront = slot + 1;
+    });
+    const backStart = Math.max(0, antalSkift - backSpecials.length);
+    backSpecials.forEach((sol, i) => specialSlots.set(sol, backStart + i));
 
     // Spåra senast aktivt skift per soldat (för "mest utvilad"-urvalet)
     const lastFinished = {};
@@ -382,9 +400,9 @@ function genererSchema() {
         const busyNow = new Set(pipeline.slice(0, N - 1));
 
         let nyPerson;
-        if (schedulableSpecials.length > 0 && s >= specialStart && (s - specialStart) < schedulableSpecials.length) {
-            // Specialsoldat in exakt när vilokravet är uppfyllt
-            nyPerson = schedulableSpecials[s - specialStart];
+        const specialEntry = [...specialSlots.entries()].find(([, slot]) => slot === s);
+        if (specialEntry) {
+            nyPerson = specialEntry[0];
         } else {
             // Välj ordinarie soldat med längst vila som inte är i pipelinen nu
             const candidates = activePool.filter(sol => !busyNow.has(sol));
@@ -442,7 +460,29 @@ function renderSchema() {
     });
     html += '</tbody></table></div>';
     document.getElementById('schemaContainer').innerHTML = html;
+
+    // Knappar för att flytta Förare/RPAS fram eller bak individuellt
+    const ctrl = document.getElementById('specialControls');
+    if (schedulableSpecials.length > 0) {
+        let ch = '<div style="display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 4px">';
+        schedulableSpecials.forEach(sol => {
+            const isFront = specialFrontSet.has(sol);
+            const role = soldatMinVila[sol] === 6 ? 'F' : 'R';
+            ch += `<button class="btn btn-sm btn-secondary" onclick="toggleSpecialPos('${sol}')" style="font-size:0.78rem">${sol} (${role}): ${isFront ? '↑ Fram' : '↓ Bak'}</button>`;
+        });
+        ch += '</div>';
+        ctrl.innerHTML = ch;
+    } else {
+        ctrl.innerHTML = '';
+    }
+
     renderGantt();
+}
+
+function toggleSpecialPos(namn) {
+    if (specialFrontSet.has(namn)) specialFrontSet.delete(namn);
+    else specialFrontSet.add(namn);
+    genererSchema();
 }
 
 function renderGantt() {
@@ -561,7 +601,7 @@ function atergaInst() {
 
 function nollstall() {
     if (!confirm('Nollställ schemat och börja om?')) return;
-    schema = []; poster = []; soldater = [];
+    schema = []; poster = []; soldater = []; specialFrontSet = new Set();
     document.getElementById('tnr').value = '';
     document.getElementById('enhet').value = '';
     document.getElementById('skiftLangd').value = '2';
