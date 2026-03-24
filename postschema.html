@@ -337,57 +337,48 @@ function genererSchema() {
 
     schema = [];
     const antalSkift = Math.ceil(total / skift);
+    const N = poster.length;
 
-    // Beräkna viloblock (mitten av schemat) för begränsade soldater
-    const viloBlock = {}; // soldatNamn → { start, end } skiftindex (exklusiv)
-    soldater.forEach(s => {
-        const minVila = soldatMinVila[s] || 0;
-        if (minVila > 0) {
-            const fria = Math.min(Math.ceil(minVila / skift), antalSkift);
-            const start = Math.floor((antalSkift - fria) / 2);
-            viloBlock[s] = { start, end: start + fria };
-        }
-    });
+    // Trappstegsrotation: ordinarie soldater roterar, specialroller (förare/RPAS) läggs sist
+    const regularPool = soldater.filter(s => !soldatMinVila[s]);
+    const specialPool = soldater.filter(s => soldatMinVila[s] > 0);
+    const activePool  = regularPool.length >= N ? regularPool : soldater; // fallback om alla är special
+    const fullPool    = [...activePool, ...specialPool];
 
-    // Soldater vars viloblock täcker hela schemat schemaläggas aldrig
-    const aldrigSchema = new Set(
-        soldater.filter(s => { const b = viloBlock[s]; return b && (b.end - b.start) >= antalSkift; })
-    );
+    // Specialsoldater tar POST1 under de sista specialPool.length skiften
+    const specialStart = antalSkift - specialPool.length;
 
-    // Blockstorlek: 2 skift i rad per soldatgrupp innan rotation
-    // Fast värde → alla soldater roteras jämnt och var och en får sammanhängande vila
-    const blockSize = 2;
+    // Initialisera pipeline med de sista N personerna ur fullPool
+    // pipeline[0] → används som POST2, pipeline[1] → POST3, osv.
+    const pipeline = [];
+    for (let i = 0; i < N; i++) {
+        pipeline.push(fullPool[(fullPool.length - 1 - i + fullPool.length) % fullPool.length]);
+    }
 
     let currentTime = new Date(startTid.getTime());
 
     for (let s = 0; s < antalSkift; s++) {
-        const offsetMin = [-10, 0, 10][Math.floor(Math.random() * 3)]; // hårt: -10, 0 eller +10 min
-        const duration = skift * 3600000 + offsetMin * 60000;
         const skiftStart = new Date(currentTime.getTime());
-        const skiftSlut = new Date(currentTime.getTime() + duration);
-        currentTime = skiftSlut; // nästa skift börjar exakt där detta slutar
-        const tidStr = formatTid(skiftStart) + '–' + formatTid(skiftSlut);
+        currentTime = new Date(currentTime.getTime() + skift * 3600000);
+        const tidStr = formatTid(skiftStart) + '–' + formatTid(currentTime);
 
-        // Eligible = inte i viloblock och inte i aldrigSchema
-        const eligible = soldater.filter(sol => {
-            if (aldrigSchema.has(sol)) return false;
-            const b = viloBlock[sol];
-            return !b || s < b.start || s >= b.end;
-        });
-        // Fallback exkluderar alltid aldrigSchema-soldater
-        const fallback = soldater.filter(sol => !aldrigSchema.has(sol));
-        const pool = eligible.length >= poster.length ? eligible
-                   : fallback.length >= poster.length ? fallback
-                   : soldater; // absolut sista utväg
+        // Ny soldat kliver in i POST1 varje skift
+        let nyPerson;
+        if (specialPool.length > 0 && s >= specialStart && (s - specialStart) < specialPool.length) {
+            nyPerson = specialPool[s - specialStart];
+        } else {
+            nyPerson = activePool[s % activePool.length];
+        }
 
-        // Rotera soldater i block → sammanhängande vila
-        // Inom blocket roteras postordningen → varje soldat rör sig mellan poster
-        const blockNum = Math.floor(s / blockSize);
-        const postOffset = s % poster.length; // rotera poster inom blocket
+        // Tilldela poster: POST1=nyPerson, POST2=pipeline[0], POST3=pipeline[1] ...
         poster.forEach((post, pi) => {
-            const soldatNamn = pool[(blockNum * poster.length + (pi + postOffset) % poster.length) % pool.length];
-            schema.push({ tid: tidStr, startMs: skiftStart.getTime(), endMs: skiftSlut.getTime(), post, soldat: soldatNamn, skiftNr: s });
+            const soldatNamn = pi === 0 ? nyPerson : (pipeline[pi - 1] || nyPerson);
+            schema.push({ tid: tidStr, startMs: skiftStart.getTime(), endMs: currentTime.getTime(), post, soldat: soldatNamn, skiftNr: s });
         });
+
+        // Förflytta pipeline
+        pipeline.unshift(nyPerson);
+        if (pipeline.length > N) pipeline.length = N;
     }
 
     renderSchema();
