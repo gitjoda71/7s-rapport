@@ -284,10 +284,10 @@ function parseTNR(tnr) {
     return new Date(now.getFullYear(), now.getMonth(), day, hh, mm, 0, 0);
 }
 
-// ── Formatera tid ─────────────────────────────────────────────────────────────
+// ── Formatera tid (TNR: DDHHMM) ───────────────────────────────────────────────
 function formatTid(d) {
     const p = n => String(n).padStart(2, '0');
-    return p(d.getDate()) + '/' + p(d.getMonth()+1) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
+    return p(d.getDate()) + p(d.getHours()) + p(d.getMinutes());
 }
 
 // ── Generera schema ───────────────────────────────────────────────────────────
@@ -310,7 +310,7 @@ function genererSchema() {
     let soldatIndex = 0;
 
     for (let s = 0; s < antalSkift; s++) {
-        const offsetMin = Math.floor(Math.random() * 21) - 10; // ±10 min, kan vara 0
+        const offsetMin = [-10, 0, 10][Math.floor(Math.random() * 3)]; // hårt: -10, 0 eller +10 min
         const skiftStart = new Date(startTid.getTime() + s * skift * 3600000 + offsetMin * 60000);
         const skiftSlut = new Date(skiftStart.getTime() + skift * 3600000);
         const tidStr = formatTid(skiftStart) + '–' + formatTid(skiftSlut);
