@@ -336,8 +336,20 @@ function genererSchema() {
 
     schema = [];
     const antalSkift = Math.ceil(total / skift);
-    let soldatIndex = 0;
+
+    // Beräkna viloblock (mitten av schemat) för begränsade soldater
+    const viloBlock = {}; // soldatNamn → { start, end } skiftindex (exklusiv)
+    soldater.forEach(s => {
+        const minVila = soldatMinVila[s] || 0;
+        if (minVila > 0) {
+            const fria = Math.min(Math.ceil(minVila / skift), antalSkift);
+            const start = Math.floor((antalSkift - fria) / 2);
+            viloBlock[s] = { start, end: start + fria };
+        }
+    });
+
     let currentTime = new Date(startTid.getTime());
+    let assignIdx = 0;
 
     for (let s = 0; s < antalSkift; s++) {
         const offsetMin = [-10, 0, 10][Math.floor(Math.random() * 3)]; // hårt: -10, 0 eller +10 min
@@ -347,11 +359,19 @@ function genererSchema() {
         currentTime = skiftSlut; // nästa skift börjar exakt där detta slutar
         const tidStr = formatTid(skiftStart) + '–' + formatTid(skiftSlut);
 
+        // Eligible = inte i viloblock
+        const eligible = soldater.filter(sol => {
+            const b = viloBlock[sol];
+            return !b || s < b.start || s >= b.end;
+        });
+        // Fallback om för få soldater täcker posterna
+        const pool = eligible.length >= poster.length ? eligible : soldater;
+
         poster.forEach((post, pi) => {
-            const soldatNamn = soldater[(soldatIndex + pi) % soldater.length];
+            const soldatNamn = pool[(assignIdx + pi) % pool.length];
             schema.push({ tid: tidStr, startMs: skiftStart.getTime(), endMs: skiftSlut.getTime(), post, soldat: soldatNamn, skiftNr: s });
         });
-        soldatIndex = (soldatIndex + poster.length) % soldater.length;
+        assignIdx = (assignIdx + poster.length) % pool.length;
     }
 
     renderSchema();
@@ -438,18 +458,27 @@ function renderGantt() {
 
 function checkSovTid() {
     const skift = parseInt(document.getElementById('skiftLangd').value);
-    const totalTid = parseInt(document.getElementById('totalTimmar').value);
     const varnDiv = document.getElementById('sovVarning');
     const varningar = [];
+
+    // Alla unika skiftnummer i ordning
+    const alleSkift = [...new Set(schema.map(e => e.skiftNr))].sort((a, b) => a - b);
 
     soldater.forEach(s => {
         const minVila = soldatMinVila[s] || 0;
         if (minVila === 0) return; // Standard – ingen krav
-        const pass = schema.filter(e => e.soldat === s).length;
-        const aktivTid = pass * skift;
-        const vilaTid = totalTid - aktivTid;
+
+        const aktivaSkift = new Set(schema.filter(e => e.soldat === s).map(e => e.skiftNr));
+
+        // Räkna max sammanhängande lediga skift
+        let maxFria = 0, raka = 0;
+        alleSkift.forEach(sn => {
+            if (!aktivaSkift.has(sn)) { raka++; maxFria = Math.max(maxFria, raka); }
+            else raka = 0;
+        });
+        const maxVilaH = maxFria * skift;
         const rollNamn = minVila === 6 ? 'Förare' : 'RPAS';
-        if (vilaTid < minVila) varningar.push(`\u26a0 ${s} (${rollNamn}) beräknas få ${vilaTid}h vila – krav: ${minVila}h ostörd vila.`);
+        if (maxVilaH < minVila) varningar.push(`\u26a0 ${s} (${rollNamn}) max sammanhängande vila: ${maxVilaH}h – krav: ${minVila}h.`);
     });
 
     if (varningar.length) {
