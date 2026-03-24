@@ -131,7 +131,17 @@
     <main>
     <div class="form-view" id="formView">
 
-        <!-- Nivå + Enhet + TNR -->
+        <!-- TNR -->
+        <div class="form-group">
+            <label for="tnr">TNR</label>
+            <div class="input-row" style="margin-top:6px">
+                <input type="text" id="tnr" placeholder="DDHHMM" inputmode="numeric" maxlength="6" autocomplete="off">
+                <button class="btn btn-sm btn-time" onclick="setNow()">Nu</button>
+            </div>
+            <div class="field-hint">Format: DDHHMM (dag–timme–minut, t.ex. 231430)</div>
+        </div>
+
+        <!-- Nivå + Enhet -->
         <div class="form-group">
             <div class="label-row"><label>Nivå</label></div>
             <select id="niva" onchange="updateNiva()">
@@ -144,16 +154,6 @@
         <div class="form-group">
             <div class="label-row"><label for="enhet" id="enhetLabel">Kompani/Enhet</label></div>
             <input type="text" id="enhet" placeholder="Ex: AQ / 2a plut" autocomplete="off">
-        </div>
-
-        <!-- TNR -->
-        <div class="form-group">
-            <div class="label-row"><label for="tnr">TNR</label></div>
-            <div class="input-row">
-                <input type="text" id="tnr" placeholder="DDHHMM" inputmode="numeric" maxlength="6" autocomplete="off">
-                <button class="btn btn-sm btn-time" onclick="setNow()">Nu</button>
-            </div>
-            <div class="field-hint">Format: DDHHMM (dag–timme–minut, t.ex. 231430)</div>
         </div>
 
         <hr class="divider">

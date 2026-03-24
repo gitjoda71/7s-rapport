@@ -147,6 +147,16 @@
     <!-- FORM VIEW -->
     <div class="form-view" id="formView">
 
+        <!-- TNR -->
+        <div class="form-group">
+            <label for="tnr">TNR</label>
+            <div class="input-row" style="margin-top:6px">
+                <input type="text" id="tnr" placeholder="DDHHMM" inputmode="numeric" maxlength="6" autocomplete="off">
+                <button class="btn btn-sm btn-time" onclick="setNow()">Nu</button>
+            </div>
+            <div class="field-hint">Format: DDHHMM (dag–timme–minut, t.ex. 231430)</div>
+        </div>
+
         <!-- PUK-IMPORT -->
         <div class="form-group import-group">
             <div class="section-label">
@@ -168,13 +178,6 @@
                 <option value="OBO">OBO</option>
                 <option value="OBK">OBK</option>
             </select>
-
-            <label for="tnr" style="margin-top:12px">TNR</label>
-            <div class="input-row" style="margin-top:6px">
-                <input type="text" id="tnr" placeholder="DDHHMM" inputmode="numeric" maxlength="6" autocomplete="off">
-                <button class="btn btn-sm btn-time" onclick="setNow()">Nu</button>
-            </div>
-            <div style="font-size:.72rem;color:var(--text-muted);margin-top:5px">Format: DDHHMM (dag–timme–minut, t.ex. 231430)</div>
 
             <label for="plats" style="margin-top:12px">Plats</label>
             <input type="text" id="plats" placeholder="Plats f&ouml;r ordergivningen">

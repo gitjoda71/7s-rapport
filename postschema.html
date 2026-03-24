@@ -56,6 +56,7 @@
 
         .input-row { display: flex; gap: 8px; align-items: flex-start; }
         .input-row input { flex: 1; min-width: 0; }
+        .input-col2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 
         .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 12px 20px; border: none; border-radius: var(--radius); font-family: inherit; font-size: 0.95rem; font-weight: 600; letter-spacing: 0.04em; cursor: pointer; transition: background 0.15s, transform 0.1s; -webkit-tap-highlight-color: transparent; }
         .btn:active { transform: scale(0.97); }
@@ -135,6 +136,16 @@
     <!-- STEG 1: Inställningar -->
     <div id="steg1">
 
+        <!-- TNR -->
+        <div class="form-group">
+            <label for="tnr">TNR</label>
+            <div class="input-row" style="margin-top:6px">
+                <input type="text" id="tnr" placeholder="DDHHMM" inputmode="numeric" maxlength="6" autocomplete="off">
+                <button class="btn btn-sm btn-time" onclick="setNow()">Nu</button>
+            </div>
+            <div class="field-hint">Format: DDHHMM (dag–timme–minut, t.ex. 231430)</div>
+        </div>
+
         <div class="form-group section-group">
             <div class="section-label">
                 <div class="section-letter">I</div>
@@ -157,16 +168,17 @@
                 <button class="btn btn-sm btn-time" onclick="setNu()">Nu</button>
             </div>
 
-            <div style="display:flex;gap:12px;margin-top:12px">
-                <div style="flex:1">
-                    <label for="skiftLangd">Skiftlängd (timmar)</label>
-                    <input type="number" id="skiftLangd" value="2" min="1" max="12">
+            <div class="input-col2" style="margin-top:12px">
+                <div>
+                    <label for="skiftLangd">Skiftlängd (tim)</label>
+                    <input type="number" id="skiftLangd" value="2" min="1" max="12" style="margin-top:6px">
                 </div>
-                <div style="flex:1">
-                    <label for="totalTimmar">Antal timmar att schemalägga</label>
-                    <input type="number" id="totalTimmar" value="24" min="4" max="168">
+                <div>
+                    <label for="totalTimmar">Totalt (tim)</label>
+                    <input type="number" id="totalTimmar" value="36" min="4" max="168" style="margin-top:6px">
                 </div>
             </div>
+            <div class="field-hint">Varje skift får en slumpmässig ±10 min förskjutning för att förvilla spanare.</div>
         </div>
 
         <div class="form-group section-group">
@@ -265,7 +277,11 @@ function addSoldat(value = '') {
     inp.focus();
 }
 
-// ── Nu-knapp ─────────────────────────────────────────────────────────────────
+// ── Nu-knappar ────────────────────────────────────────────────────────────────
+function setNow() {
+    const now = new Date(), p = n => String(n).padStart(2, '0');
+    document.getElementById('tnr').value = p(now.getDate()) + p(now.getHours()) + p(now.getMinutes());
+}
 function setNu() {
     const now = new Date(), p = n => String(n).padStart(2, '0');
     document.getElementById('startTid').value =
@@ -298,7 +314,8 @@ function genererSchema() {
     let soldatIndex = 0;
 
     for (let s = 0; s < antalSkift; s++) {
-        const skiftStart = new Date(startTid.getTime() + s * skift * 3600000);
+        const offsetMin = Math.floor(Math.random() * 21) - 10; // ±10 min, kan vara 0
+        const skiftStart = new Date(startTid.getTime() + s * skift * 3600000 + offsetMin * 60000);
         const skiftSlut = new Date(skiftStart.getTime() + skift * 3600000);
         const tidStr = formatTid(skiftStart) + '–' + formatTid(skiftSlut);
 
@@ -425,6 +442,7 @@ function atergaInst() {
 function nollstall() {
     if (!confirm('Nollställ schemat och börja om?')) return;
     schema = []; poster = []; soldater = [];
+    document.getElementById('tnr').value = '';
     document.getElementById('enhet').value = '';
     document.getElementById('skiftLangd').value = '2';
     document.getElementById('totalTimmar').value = '24';
@@ -444,6 +462,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderSagesman();
     const last = localStorage.getItem('sch_lastSagesman');
     if (last) document.getElementById('sagesman').value = last;
+    setNow();
     setNu();
     addPost('POST 1'); addPost('POST 2');
     addSoldat(''); addSoldat(''); addSoldat(''); addSoldat('');

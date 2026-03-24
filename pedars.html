@@ -130,22 +130,20 @@
     <main>
     <div class="form-view" id="formView">
 
-        <!-- Enhet + TNR + Sagesman -->
+        <!-- TNR -->
         <div class="form-group">
-            <div class="input-col2">
-                <div>
-                    <div class="sub-label" style="margin-top:0">Enhet/Pluton</div>
-                    <input type="text" id="enhet" placeholder="2a Plut" autocomplete="off" style="margin-top:4px">
-                </div>
-                <div>
-                    <div class="sub-label" style="margin-top:0">TNR</div>
-                    <div class="input-row" style="margin-top:4px">
-                        <input type="text" id="tnr" placeholder="DDHHMM" inputmode="numeric" maxlength="6" autocomplete="off">
-                        <button class="btn btn-sm btn-time" onclick="setNow()">Nu</button>
-                    </div>
-                    <div class="field-hint">Format: DDHHMM (t.ex. 231430)</div>
-                </div>
+            <label for="tnr">TNR</label>
+            <div class="input-row" style="margin-top:6px">
+                <input type="text" id="tnr" placeholder="DDHHMM" inputmode="numeric" maxlength="6" autocomplete="off">
+                <button class="btn btn-sm btn-time" onclick="setNow()">Nu</button>
             </div>
+            <div class="field-hint">Format: DDHHMM (dag–timme–minut, t.ex. 231430)</div>
+        </div>
+
+        <!-- Enhet -->
+        <div class="form-group">
+            <label for="enhet">Enhet/Pluton</label>
+            <input type="text" id="enhet" placeholder="2a Plut" autocomplete="off" style="margin-top:6px">
         </div>
 
         <!-- P – PERSONAL -->
