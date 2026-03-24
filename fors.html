@@ -186,11 +186,11 @@
             <div class="section-label">
                 <div class="section-letter">O</div>
                 <div>
-                    <div class="section-title">Ori om motståndaren</div>
+                    <div class="section-title">Orientering</div>
                     <div class="section-subtitle">Situationen efter genomförd verksamhet</div>
                 </div>
             </div>
-            <textarea id="o_mot" rows="3" placeholder="Fiendens situation, rörelser, förluster, gruppering..."></textarea>
+            <textarea id="o_mot" rows="3" placeholder="Fiende, egna förband, eget läge, rörelser, förluster..."></textarea>
         </div>
 
         <!-- R – REDOGÖRELSE -->
@@ -283,7 +283,7 @@ function generateReport() {
     }
 
     const om = v('o_mot');
-    if (om) { lines.push('O – ORI OM MOTSTÅNDAREN'); lines.push(om); lines.push(''); }
+    if (om) { lines.push('O – ORIENTERING'); lines.push(om); lines.push(''); }
 
     const rg = v('r_genomford'), rp = v('r_pagaende'), rpl = v('r_planerad');
     if (rg || rp || rpl) {

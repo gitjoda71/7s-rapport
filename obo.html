@@ -203,6 +203,9 @@
             <label for="o_terrang" style="margin-top:12px">Terr&auml;ngen</label>
             <textarea id="o_terrang" placeholder="Terr&auml;ngen &mdash; relevant f&ouml;r uppgiften..."></textarea>
 
+            <label for="o_vader" style="margin-top:12px">V&auml;der</label>
+            <textarea id="o_vader" placeholder="V&auml;der &mdash; vind, sikt, nederb&ouml;rd, m&ouml;rker..."></textarea>
+
             <label for="o_civil" style="margin-top:12px">Civill&auml;get</label>
             <textarea id="o_civil" placeholder="Civill&auml;get &mdash; civil n&auml;rvaro, restriktioner..."></textarea>
 
@@ -235,6 +238,10 @@
 
             <span class="sub-label">RIL &ndash; Riktlinjer (valfritt)</span>
             <textarea id="b_ril" placeholder="Vad g&auml;ller fortl&ouml;pande, omfallsplan..."></textarea>
+
+            <span class="sub-label">RFI &ndash; Regler f&ouml;r ingripande</span>
+            <textarea id="b_rfi" placeholder="Ordagrant fr&aring;n 5-punktsordern..."></textarea>
+            <div class="field-hint">Alltid med &ndash; ordagrant fr&aring;n h&ouml;gre chefs order</div>
         </div>
 
         <!-- Sektion O/K – ORDER/KOMMANDO -->
@@ -249,6 +256,17 @@
 
             <div id="orderLista"></div>
             <button class="btn-add" onclick="addOrder()">+ L&auml;gg till ordertagare</button>
+
+            <hr class="divider">
+
+            <label for="o_skadeplats" style="margin-top:4px">Skadeplatsen</label>
+            <textarea id="o_skadeplats" rows="2" placeholder="Var tas skadade om hand..."></textarea>
+
+            <label for="o_samband" style="margin-top:12px">Samband</label>
+            <textarea id="o_samband" rows="2" placeholder="Radiokanal, f&ouml;rbindelsepunkter, reserv..."></textarea>
+
+            <label for="o_chef_pos" style="margin-top:12px">Var g&aring;r chefen och stf</label>
+            <textarea id="o_chef_pos" rows="2" placeholder="Chefens och stf:s placering under uppgiften..."></textarea>
         </div>
 
         <button class="btn btn-primary" onclick="generateReport()">Generera order</button>
@@ -356,6 +374,7 @@ function generateReport() {
     if (v('o_motstandaren')) oriLines.push(`Fi: ${v('o_motstandaren')}`);
     if (v('o_egna')) oriLines.push(`Egna: ${v('o_egna')}`);
     if (v('o_terrang')) oriLines.push(`Terr\u00e4ng: ${v('o_terrang')}`);
+    if (v('o_vader')) oriLines.push(`V\u00e4der: ${v('o_vader')}`);
     if (v('o_civil')) oriLines.push(`Civil: ${v('o_civil')}`);
     if (v('o_plut_uppgift')) oriLines.push(`Plutonens uppgift: ${v('o_plut_uppgift')}`);
     if (oriLines.length || v('o_var_uppgift')) {
@@ -372,6 +391,7 @@ function generateReport() {
     if (v('b_darefter')) besLines.push(`D\u00e4refter: ${v('b_darefter')}`);
     if (v('b_slutligen')) besLines.push(`Slutligen: ${v('b_slutligen')}`);
     if (v('b_ril')) besLines.push(`RIL: ${v('b_ril')}`);
+    besLines.push(`RFI: ${v('b_rfi') || '\u2013'}`);
     if (besLines.length) {
         lines.push('BESLUT');
         besLines.forEach(l => lines.push(l));
@@ -393,6 +413,9 @@ function generateReport() {
                 if (beredd) lines.push(`  Beredd: ${beredd}`);
             }
         });
+        if (v('o_skadeplats')) lines.push(`Skadeplatsen: ${v('o_skadeplats')}`);
+        if (v('o_samband')) lines.push(`Samband: ${v('o_samband')}`);
+        if (v('o_chef_pos')) lines.push(`Chefen/stf: ${v('o_chef_pos')}`);
         lines.push('');
     }
 

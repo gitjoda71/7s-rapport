@@ -205,7 +205,7 @@
                 </div>
             </div>
             <table class="ammo-table">
-                <thead><tr><th>Typ</th><th>Behov (ant.)</th></tr></thead>
+                <thead><tr><th>Typ</th><th>Kvar (%)</th><th>Behov (ant.)</th></tr></thead>
                 <tbody id="ammoTabell"></tbody>
             </table>
         </div>
@@ -268,6 +268,7 @@ function initAmmo() {
     AMMO_TYPES.forEach(typ => {
         const tr = document.createElement('tr');
         tr.innerHTML = `<td style="padding:4px 8px;color:var(--text-secondary);font-size:.88rem;white-space:nowrap">${typ}</td>
+                        <td><input type="number" inputmode="numeric" min="0" max="100" placeholder="–" id="ammokvar_${typ.replace(/[^a-z0-9]/gi,'_')}"></td>
                         <td><input type="number" inputmode="numeric" min="0" placeholder="0" id="ammo_${typ.replace(/[^a-z0-9]/gi,'_')}"></td>`;
         tb.appendChild(tr);
     });
@@ -392,11 +393,17 @@ function generateReport() {
     // A
     const ammoLines = [];
     AMMO_TYPES.forEach(typ => {
-        const el = document.getElementById('ammo_'+typ.replace(/[^a-z0-9]/gi,'_'));
-        const val = el ? el.value.trim() : '';
-        if (val && val !== '0') ammoLines.push(`  ${typ}: ${val}`);
+        const key = typ.replace(/[^a-z0-9]/gi,'_');
+        const kvar = document.getElementById('ammokvar_'+key)?.value.trim();
+        const behov = document.getElementById('ammo_'+key)?.value.trim();
+        if ((kvar && kvar !== '') || (behov && behov !== '0')) {
+            let parts = [];
+            if (kvar !== '') parts.push(`kvar: ${kvar}%`);
+            if (behov && behov !== '0') parts.push(`behov: ${behov}`);
+            ammoLines.push(`  ${typ}: ${parts.join(', ')}`);
+        }
     });
-    if (ammoLines.length) { lines.push('A – AMMUNITION (BEHOV)'); lines.push(...ammoLines); lines.push(''); }
+    if (ammoLines.length) { lines.push('A – AMMUNITION'); lines.push(...ammoLines); lines.push(''); }
 
     // R
     const repDivs = document.getElementById('repLista').children;
