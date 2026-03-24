@@ -76,10 +76,12 @@
         .report-output { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; font-family: 'Courier New', monospace; font-size: 0.95rem; line-height: 1.8; white-space: pre-wrap; color: var(--text-primary); margin-bottom: 14px; }
         .copy-feedback { text-align: center; color: var(--accent); font-size: 0.85rem; font-weight: 600; height: 24px; opacity: 0; transition: opacity 0.2s; margin-bottom: 12px; }
         .copy-feedback.show { opacity: 1; }
-        .tab-nav { display: flex; gap: 4px; margin-bottom: 16px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius); padding: 4px; }
+        .tab-nav { display: flex; gap: 4px; margin-bottom: 4px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius); padding: 4px; }
         .tab-link { flex: 1; text-align: center; padding: 9px 2px; border-radius: var(--radius-sm); color: var(--text-muted); text-decoration: none; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.05em; transition: background 0.15s, color 0.15s; -webkit-tap-highlight-color: transparent; }
         .tab-link:hover { background: var(--bg-card); color: var(--text-secondary); }
         .tab-link.active { background: var(--accent-dim); color: var(--accent); }
+        .tab-nav-sub { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; margin-bottom: 16px; background: var(--bg-secondary); border: 1px solid var(--border); border-top: none; border-radius: 0 0 var(--radius) var(--radius); padding: 3px 4px 4px; }
+        .tab-nav-sub .tab-link { font-size: 0.62rem; padding: 6px 2px; letter-spacing: 0.04em; }
     </style>
 </head>
 <body>
@@ -94,6 +96,15 @@
         <a href="scrim.html" class="tab-link active">SCRIM</a>
         <a href="weft.html" class="tab-link">WEFT</a>
         <a href="ah.html" class="tab-link">A–H</a>
+    </nav>
+    <nav class="tab-nav-sub">
+        <a href="obslosa.html" class="tab-link">OBSLÖSA</a>
+        <a href="fors.html" class="tab-link">FORS</a>
+        <a href="pedars.html" class="tab-link">PEDARS</a>
+        <a href="postschema.html" class="tab-link">SCHEMA</a>
+        <a href="eobusare.html" class="tab-link">EOBUSARE</a>
+        <a href="obo.html" class="tab-link">OBO</a>
+        <a href="rassoika.html" class="tab-link">RASSOIKA</a>
     </nav>
     <main>
         <div class="form-view" id="formView">

@@ -353,8 +353,12 @@ function genererSchema() {
         soldater.filter(s => { const b = viloBlock[s]; return b && (b.end - b.start) >= antalSkift; })
     );
 
+    // Blockstorlek: hur många skift i rad varje soldatgrupp bemannar innan rotation
+    // Minst 2 skift per block för att ge sammanhängande vila
+    const aktivaSoldater = soldater.filter(s => !aldrigSchema.has(s));
+    const blockSize = Math.max(2, Math.ceil(aktivaSoldater.length / Math.max(1, poster.length)));
+
     let currentTime = new Date(startTid.getTime());
-    let assignIdx = 0;
 
     for (let s = 0; s < antalSkift; s++) {
         const offsetMin = [-10, 0, 10][Math.floor(Math.random() * 3)]; // hårt: -10, 0 eller +10 min
@@ -376,11 +380,12 @@ function genererSchema() {
                    : fallback.length >= poster.length ? fallback
                    : soldater; // absolut sista utväg
 
+        // Rotera soldater i block, inte varje skift → längre sammanhängande vilotid
+        const blockNum = Math.floor(s / blockSize);
         poster.forEach((post, pi) => {
-            const soldatNamn = pool[(assignIdx + pi) % pool.length];
+            const soldatNamn = pool[(blockNum * poster.length + pi) % pool.length];
             schema.push({ tid: tidStr, startMs: skiftStart.getTime(), endMs: skiftSlut.getTime(), post, soldat: soldatNamn, skiftNr: s });
         });
-        assignIdx = (assignIdx + poster.length) % pool.length;
     }
 
     renderSchema();
