@@ -1,4 +1,4 @@
-const CACHE = 'hv-v23';
+const CACHE = 'hv-v24';
 const FILES = [
   './',
   './index.html',
@@ -13,7 +13,8 @@ const FILES = [
   './what.html',
   './scrim.html',
   './weft.html',
-  './ah.html'
+  './ah.html',
+  './version.js'
 ];
 
 self.addEventListener('install', e => {
