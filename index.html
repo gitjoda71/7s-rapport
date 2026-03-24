@@ -174,25 +174,12 @@
         .copy-feedback.show { opacity: 1; }
 
         /* Navigering */
-        .tab-nav { display: flex; gap: 4px; margin-bottom: 16px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius); padding: 4px; }
+        .tab-nav { display: flex; gap: 4px; margin-bottom: 4px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius); padding: 4px; }
         .tab-link { flex: 1; text-align: center; padding: 9px 2px; border-radius: var(--radius-sm); color: var(--text-muted); text-decoration: none; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.05em; transition: background 0.15s, color 0.15s; -webkit-tap-highlight-color: transparent; }
         .tab-link:hover { background: var(--bg-card); color: var(--text-secondary); }
         .tab-link.active { background: var(--accent-dim); color: var(--accent); }
-
-        /* Nya formulär – länkgrid */
-        .forms-section { margin-top: 24px; }
-        .forms-section-title { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; padding-left: 2px; }
-        .forms-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
-        .form-link {
-            display: flex; align-items: center; justify-content: center;
-            padding: 10px 4px; border-radius: var(--radius-sm);
-            background: var(--bg-card); border: 1px solid var(--border);
-            color: var(--text-secondary); text-decoration: none;
-            font-size: 0.72rem; font-weight: 700; letter-spacing: 0.05em;
-            text-align: center; transition: background 0.15s, color 0.15s, border-color 0.15s;
-            -webkit-tap-highlight-color: transparent;
-        }
-        .form-link:hover { background: var(--accent-dim); color: var(--accent); border-color: var(--border-focus); }
+        .tab-nav-sub { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; margin-bottom: 16px; background: var(--bg-secondary); border: 1px solid var(--border); border-top: none; border-radius: 0 0 var(--radius) var(--radius); padding: 3px 4px 4px; }
+        .tab-nav-sub .tab-link { font-size: 0.62rem; padding: 6px 2px; letter-spacing: 0.04em; }
     </style>
 </head>
 <body>
@@ -207,6 +194,15 @@
         <a href="scrim.html" class="tab-link">SCRIM</a>
         <a href="weft.html" class="tab-link">WEFT</a>
         <a href="ah.html" class="tab-link">A–H</a>
+    </nav>
+    <nav class="tab-nav-sub">
+        <a href="obslosa.html" class="tab-link">OBSLÖSA</a>
+        <a href="fors.html" class="tab-link">FORS</a>
+        <a href="pedars.html" class="tab-link">PEDARS</a>
+        <a href="postschema.html" class="tab-link">SCHEMA</a>
+        <a href="eobusare.html" class="tab-link">EOBUSARE</a>
+        <a href="obo.html" class="tab-link">OBO</a>
+        <a href="rassoika.html" class="tab-link">RASSOIKA</a>
     </nav>
     <main>
         <div class="form-view" id="formView">
@@ -365,18 +361,6 @@
         </div>
     </main>
 
-    <div class="forms-section">
-        <div class="forms-section-title">Övriga formulär</div>
-        <div class="forms-grid">
-            <a href="obslosa.html" class="form-link">OBSLÖSA</a>
-            <a href="fors.html" class="form-link">FORS</a>
-            <a href="pedars.html" class="form-link">PEDARS</a>
-            <a href="postschema.html" class="form-link">SCHEMA</a>
-            <a href="eobusare.html" class="form-link">EOBUSARE</a>
-            <a href="obo.html" class="form-link">OBO</a>
-            <a href="rassoika.html" class="form-link">RASSOIKA</a>
-        </div>
-    </div>
 </div>
 
 <script>
