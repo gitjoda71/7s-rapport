@@ -81,7 +81,8 @@
 
         .dyn-card { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; margin-bottom: 6px; display: flex; gap: 8px; align-items: flex-start; }
         .dyn-card input, .dyn-card select { flex: 1; min-width: 0; }
-        .dyn-card select { min-width: 120px; flex: 0 0 auto; }
+        .dyn-card select { min-width: 130px; flex: 0 0 130px; }
+        .dyn-card input[type="text"] { min-width: 80px; }
 
         .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 12px 20px; border: none; border-radius: var(--radius); font-family: inherit; font-size: 0.95rem; font-weight: 600; letter-spacing: 0.04em; cursor: pointer; transition: background 0.15s, transform 0.1s; -webkit-tap-highlight-color: transparent; }
         .btn:active { transform: scale(0.97); }
@@ -410,8 +411,8 @@ function addPatrull() {
     card.id = 'patrullCard_' + patrullCount;
     const rollerOptions = ROLLER.map(r => `<option value="${r}">${r}</option>`).join('');
     card.innerHTML = `
-        <input type="text" placeholder="Namn/befattning">
         <select>${rollerOptions}</select>
+        <input type="text" placeholder="Namn/befattning">
         <button class="btn-remove-sm" onclick="removeCard('patrullCard_${patrullCount}')" title="Ta bort">&#10005;</button>
     `;
     lista.appendChild(card);
