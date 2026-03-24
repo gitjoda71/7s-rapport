@@ -353,10 +353,9 @@ function genererSchema() {
         soldater.filter(s => { const b = viloBlock[s]; return b && (b.end - b.start) >= antalSkift; })
     );
 
-    // Blockstorlek: hur många skift i rad varje soldatgrupp bemannar innan rotation
-    // Minst 2 skift per block för att ge sammanhängande vila
-    const aktivaSoldater = soldater.filter(s => !aldrigSchema.has(s));
-    const blockSize = Math.max(2, Math.ceil(aktivaSoldater.length / Math.max(1, poster.length)));
+    // Blockstorlek: 2 skift i rad per soldatgrupp innan rotation
+    // Fast värde → alla soldater roteras jämnt och var och en får sammanhängande vila
+    const blockSize = 2;
 
     let currentTime = new Date(startTid.getTime());
 
