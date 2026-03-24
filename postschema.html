@@ -370,7 +370,11 @@ function genererSchema() {
     for (let s = 0; s < antalSkift; s++) {
         const skiftStart = new Date(currentTime.getTime());
         currentTime = new Date(currentTime.getTime() + skift * 3600000);
-        const tidStr = formatTid(skiftStart) + '–' + formatTid(currentTime);
+        // ±10 min slumpmässig förskjutning för att förvilla spanare (påverkar ej viloberäkning)
+        const jitterMs = Math.round(Math.random() * 20 - 10) * 60000;
+        const dispStart = new Date(skiftStart.getTime() + jitterMs);
+        const dispEnd   = new Date(currentTime.getTime() + jitterMs);
+        const tidStr = formatTid(dispStart) + '–' + formatTid(dispEnd);
 
         const busyNow = new Set(pipeline.slice(0, N - 1));
 
@@ -394,7 +398,7 @@ function genererSchema() {
         // Tilldela poster: POST1=nyPerson, POST2=pipeline[0], POST3=pipeline[1] …
         poster.forEach((post, pi) => {
             const soldatNamn = pi === 0 ? nyPerson : (pipeline[pi - 1] || nyPerson);
-            schema.push({ tid: tidStr, startMs: skiftStart.getTime(), endMs: currentTime.getTime(), post, soldat: soldatNamn, skiftNr: s });
+            schema.push({ tid: tidStr, startMs: dispStart.getTime(), endMs: dispEnd.getTime(), post, soldat: soldatNamn, skiftNr: s });
         });
 
         // nyPerson är aktiv t.o.m. slot s + N - 1 (POST1 nu, POST2 nästa skift, osv.)
