@@ -35,10 +35,6 @@
         .tab-link:hover { background: var(--bg-card); color: var(--text-secondary); }
         .tab-link.active { background: var(--accent-dim); color: var(--accent); }
 
-        .progress-bar-wrap { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 20px; height: 10px; margin-bottom: 6px; overflow: hidden; }
-        .progress-bar-inner { background: var(--accent); height: 100%; border-radius: 20px; transition: width .3s; }
-        .progress-text { text-align: center; font-size: .75rem; color: var(--text-muted); margin-bottom: 14px; }
-
         .section-label { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
         .section-letter { width: 32px; height: 32px; border-radius: 50%; background: var(--accent-dim); border: 1px solid var(--accent); color: var(--accent); font-size: 1rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
         .section-title { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-secondary); }
@@ -59,8 +55,8 @@
         .input-row { display: flex; gap: 8px; align-items: flex-start; }
         .input-row input { flex: 1; min-width: 0; }
 
-        .check-row { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; cursor: pointer; font-size: .95rem; color: var(--text-primary); line-height: 1.4; }
-        .check-row input[type=checkbox] { width: 22px; height: 22px; min-width: 22px; accent-color: var(--accent); margin-top: 2px; cursor: pointer; }
+        .step-note { font-size: 0.88rem; color: var(--text-primary); padding: 6px 0; border-bottom: 1px solid var(--border); margin-bottom: 4px; }
+        .step-note:last-of-type { border-bottom: none; }
         .step-card.done { border-left-color: var(--accent); opacity: .85; }
 
         .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 12px 20px; border: none; border-radius: var(--radius); font-family: inherit; font-size: 0.95rem; font-weight: 600; letter-spacing: 0.04em; cursor: pointer; transition: background 0.15s, transform 0.1s; -webkit-tap-highlight-color: transparent; }
@@ -146,9 +142,8 @@
                     <div class="section-title">Eldst&#228;llning</div>
                     <div class="section-subtitle">Intag och positionering</div>
                 </div>
-                <div class="step-done-badge" id="badge_1" style="display:none;margin-left:auto;font-size:1.3rem;color:var(--accent)">&#10003;</div>
             </div>
-            <label class="check-row"><input type="checkbox" class="step-check" data-step="1" onchange="updateProgress()"><span>Eldst&#228;llning intagen</span></label>
+            <p class="step-note">Eldst&#228;llning intagen</p>
             <input type="text" id="e1_position" placeholder="Position / plats (MGRS eller beskrivning)" style="margin-top:8px">
         </div>
 
@@ -160,9 +155,8 @@
                     <div class="section-title">Observat&#246;r</div>
                     <div class="section-subtitle">Vem och var</div>
                 </div>
-                <div class="step-done-badge" id="badge_2" style="display:none;margin-left:auto;font-size:1.3rem;color:var(--accent)">&#10003;</div>
             </div>
-            <label class="check-row"><input type="checkbox" class="step-check" data-step="2" onchange="updateProgress()"><span>Observat&#246;r utsedd och placerad</span></label>
+            <p class="step-note">Observat&#246;r utsedd och placerad</p>
             <input type="text" id="e2_namn" placeholder="Vem &#228;r observat&#246;r? (Namn/befattning)" style="margin-top:8px">
             <input type="text" id="e2_position" placeholder="Observat&#246;rens position" style="margin-top:8px">
         </div>
@@ -175,9 +169,8 @@
                     <div class="section-title">Bevakningsomr&#229;de</div>
                     <div class="section-subtitle">Gr&#228;nser och observationsriktning</div>
                 </div>
-                <div class="step-done-badge" id="badge_3" style="display:none;margin-left:auto;font-size:1.3rem;color:var(--accent)">&#10003;</div>
             </div>
-            <label class="check-row"><input type="checkbox" class="step-check" data-step="3" onchange="updateProgress()"><span>Bevakningssektor fastst&#228;lld</span></label>
+            <p class="step-note">Bevakningssektor fastst&#228;lld</p>
             <textarea id="e3_bevak" rows="2" placeholder="Gr&#228;nser v&#228;nster/h&#246;ger och observationsriktning" style="margin-top:8px"></textarea>
         </div>
 
@@ -189,9 +182,8 @@
                     <div class="section-title">Utg&#229;ngspunkter</div>
                     <div class="section-subtitle">UPK med riktning och avst&#229;nd</div>
                 </div>
-                <div class="step-done-badge" id="badge_4" style="display:none;margin-left:auto;font-size:1.3rem;color:var(--accent)">&#10003;</div>
             </div>
-            <label class="check-row"><input type="checkbox" class="step-check" data-step="4" onchange="updateProgress()"><span>Utg&#229;ngspunkter upplagda</span></label>
+            <p class="step-note">Utg&#229;ngspunkter upplagda</p>
             <div id="upkLista" style="margin-top:8px"></div>
             <button class="btn-add" onclick="addUpk()">+ L&#228;gg till UPK</button>
         </div>
@@ -204,9 +196,8 @@
                     <div class="section-title">Samband</div>
                     <div class="section-subtitle">Kommunikation uppr&#228;ttad</div>
                 </div>
-                <div class="step-done-badge" id="badge_5" style="display:none;margin-left:auto;font-size:1.3rem;color:var(--accent)">&#10003;</div>
             </div>
-            <label class="check-row"><input type="checkbox" class="step-check" data-step="5" onchange="updateProgress()"><span>Samband uppr&#228;ttat</span></label>
+            <p class="step-note">Samband uppr&#228;ttat</p>
             <input type="text" id="e5_kanal" placeholder="N&#228;t / Kanal / Anropssignal" style="margin-top:8px">
         </div>
 
@@ -218,9 +209,8 @@
                     <div class="section-title">Am- och skaderapport</div>
                     <div class="section-subtitle">Ammunition och personal</div>
                 </div>
-                <div class="step-done-badge" id="badge_6" style="display:none;margin-left:auto;font-size:1.3rem;color:var(--accent)">&#10003;</div>
             </div>
-            <label class="check-row"><input type="checkbox" class="step-check" data-step="6" onchange="updateProgress()"><span>Ammo- och skadestatus kontrollerad</span></label>
+            <p class="step-note">Ammo- och skadestatus kontrollerad</p>
             <input type="number" id="e6_ammo" placeholder="Ammo kvar %" inputmode="numeric" min="0" max="100" style="margin-top:8px">
             <input type="number" id="e6_skadade" placeholder="Skadade (antal)" inputmode="numeric" min="0" style="margin-top:8px">
             <textarea id="e6_ovrigt" rows="2" placeholder="&#214;vrigt (valfritt)" style="margin-top:8px"></textarea>
@@ -234,9 +224,8 @@
                     <div class="section-title">Rapport till h&#246;gre chef</div>
                     <div class="section-subtitle">Statusrapport avgiven</div>
                 </div>
-                <div class="step-done-badge" id="badge_7" style="display:none;margin-left:auto;font-size:1.3rem;color:var(--accent)">&#10003;</div>
             </div>
-            <label class="check-row"><input type="checkbox" class="step-check" data-step="7" onchange="updateProgress()"><span>Rapport avgiven</span></label>
+            <p class="step-note">Rapport avgiven</p>
             <input type="text" id="e7_till" placeholder="Till vem rapporterades (anropssignal/befattning)" style="margin-top:8px">
         </div>
 
@@ -248,9 +237,8 @@
                     <div class="section-title">Eldst&#228;llningar &#8211; f&#246;rb&#228;ttra</div>
                     <div class="section-subtitle">Planerade f&#246;rb&#228;ttrings&#229;tg&#228;rder</div>
                 </div>
-                <div class="step-done-badge" id="badge_8" style="display:none;margin-left:auto;font-size:1.3rem;color:var(--accent)">&#10003;</div>
             </div>
-            <label class="check-row"><input type="checkbox" class="step-check" data-step="8" onchange="updateProgress()"><span>F&#246;rb&#228;ttringsplan fastst&#228;lld</span></label>
+            <p class="step-note">F&#246;rb&#228;ttringsplan fastst&#228;lld</p>
             <textarea id="e8_forbattra" rows="2" placeholder="Planerade f&#246;rb&#228;ttrings&#229;tg&#228;rder (gr&#228;vning, maskering, sidoskydd...)" style="margin-top:8px"></textarea>
         </div>
 
@@ -274,47 +262,6 @@
 </div>
 
 <script>
-// ── Progress ─────────────────────────────────────────────────────────────────
-function updateProgress() {
-    const checks = document.querySelectorAll('.step-check');
-    const done = Array.from(checks).filter(c => c.checked).length;
-    const total = checks.length;
-    document.getElementById('progressBar').style.width = (done / total * 100) + '%';
-    document.getElementById('progressText').textContent = done + ' / ' + total + ' steg klara';
-
-    let justCompleted = null;
-    checks.forEach(function(c) {
-        const step = c.dataset.step;
-        const badge = document.getElementById('badge_' + step);
-        const card = document.getElementById('step_' + step);
-        if (c.checked) {
-            if (!card.classList.contains('done')) {
-                if (navigator.vibrate) navigator.vibrate(50);
-                justCompleted = parseInt(step);
-            }
-            badge.style.display = 'inline';
-            card.classList.add('done');
-        } else {
-            badge.style.display = 'none';
-            card.classList.remove('done');
-        }
-    });
-
-    // Auto-scroll till nästa steg
-    if (justCompleted && justCompleted < total) {
-        const next = document.getElementById('step_' + (justCompleted + 1));
-        if (next) setTimeout(function() { next.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 300);
-    }
-}
-
-function stepChecked(stepNr) {
-    const checks = document.querySelectorAll('.step-check');
-    for (let i = 0; i < checks.length; i++) {
-        if (checks[i].dataset.step == stepNr) return checks[i].checked;
-    }
-    return false;
-}
-
 // ── UPK-lista ────────────────────────────────────────────────────────────────
 function addUpk() {
     const lista = document.getElementById('upkLista');
@@ -366,8 +313,8 @@ function generateStatuskvitto() {
         return '  ' + (i+1) + '. ' + namn + ' (' + riktn + ', ' + avst + 'm)';
     }).join('\n') || '  -';
 
-    const sambandStatus = stepChecked(5) ? 'Uppr\u00e4ttat' : 'Ej uppr\u00e4ttat';
-    const rapportStatus = stepChecked(7) ? 'Ja' : 'Nej';
+    const sambandStatus = v('e5_kanal') ? 'Uppr\u00e4ttat' : 'Ej uppr\u00e4ttat';
+    const rapportStatus = v('e7_till') ? 'Ja' : 'Nej';
 
     const ammo = v('e6_ammo');
     const skadade = v('e6_skadade');
@@ -429,8 +376,6 @@ function backToEdit() {
 function borjaOm() {
     if (!confirm('B\u00f6rja om med ny eldst\u00e4llning? All data rensas.')) return;
 
-    document.querySelectorAll('.step-check').forEach(function(c) { c.checked = false; });
-
     ['tnr','e1_position','e2_namn','e2_position','e3_bevak',
      'e5_kanal','e6_ammo','e6_skadade','e6_ovrigt','e7_till','e8_forbattra'].forEach(function(id) {
         const el = document.getElementById(id);
@@ -439,10 +384,6 @@ function borjaOm() {
 
     document.getElementById('upkLista').innerHTML = '';
 
-    document.querySelectorAll('.step-done-badge').forEach(function(b) { b.style.display = 'none'; });
-    document.querySelectorAll('.step-card').forEach(function(c) { c.classList.remove('done'); });
-
-    updateProgress();
     setNow();
     backToEdit();
     window.scrollTo(0, 0);
@@ -451,7 +392,6 @@ function borjaOm() {
 // ── Init ─────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', function() {
     setNow();
-    updateProgress();
 });
 
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('service-worker.js');

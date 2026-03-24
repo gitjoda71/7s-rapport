@@ -35,10 +35,6 @@
         .tab-link:hover { background: var(--bg-card); color: var(--text-secondary); }
         .tab-link.active { background: var(--accent-dim); color: var(--accent); }
 
-        .progress-bar-wrap { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 20px; height: 10px; margin-bottom: 6px; overflow: hidden; }
-        .progress-bar-inner { background: var(--accent); height: 100%; border-radius: 20px; transition: width .3s; }
-        .progress-text { text-align: center; font-size: .75rem; color: var(--text-muted); margin-bottom: 14px; }
-
         .form-group { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 10px; }
         .form-group.section-group { border-left: 3px solid var(--accent); }
 
@@ -79,8 +75,8 @@
         .step-badge { font-size: 1.3rem; margin-left: auto; flex-shrink: 0; }
         .step-letter { width: 32px; height: 32px; border-radius: 50%; background: var(--accent-dim); border: 1px solid var(--accent); color: var(--accent); font-size: 1rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 
-        .check-row { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; cursor: pointer; font-size: .95rem; color: var(--text-primary); line-height: 1.4; }
-        .check-row input[type=checkbox] { width: 22px; height: 22px; min-width: 22px; accent-color: var(--accent); margin-top: 2px; cursor: pointer; }
+        .step-note { font-size: 0.88rem; color: var(--text-primary); padding: 6px 0; border-bottom: 1px solid var(--border); margin-bottom: 4px; }
+        .step-note:last-of-type { border-bottom: none; }
 
         .dyn-card { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; margin-bottom: 6px; display: flex; gap: 8px; align-items: flex-start; }
         .dyn-card input, .dyn-card select { flex: 1; min-width: 0; }
@@ -169,13 +165,9 @@
                     <div class="section-title">Repetera uppgiften</div>
                     <div class="section-subtitle">Vad ska patrullen uppn&aring;?</div>
                 </div>
-                <span class="step-badge" id="badge_1">&#x2B1C;</span>
             </summary>
             <div class="step-content">
-                <label class="check-row">
-                    <input type="checkbox" id="r_rep" onchange="updateProgress()">
-                    <span>Uppgift repeterad</span>
-                </label>
+                <p class="step-note">Uppgift repeterad</p>
                 <label for="r_uppgift" style="margin-top:8px">Uppgiftens k&auml;rna</label>
                 <textarea id="r_uppgift" placeholder="Uppgiftens k&auml;rna &mdash; fiende, mineringar, egna f&ouml;rband, terr&auml;ng, v&auml;der, in/utpassering, l&ouml;sen, rapportering..."></textarea>
                 <label for="r_plan" style="margin-top:10px">Plan f&ouml;r l&ouml;sning</label>
@@ -191,13 +183,9 @@
                     <div class="section-title">Avdela personal</div>
                     <div class="section-subtitle">Roller och sammansättning</div>
                 </div>
-                <span class="step-badge" id="badge_2">&#x2B1C;</span>
             </summary>
             <div class="step-content">
-                <label class="check-row">
-                    <input type="checkbox" id="a_stf_check" onchange="updateProgress()">
-                    <span>St&auml;llf&ouml;retr&auml;dande chef utsedd</span>
-                </label>
+                <p class="step-note">St&auml;llf&ouml;retr&auml;dande chef utsedd</p>
                 <label for="a_stf_namn" style="margin-top:8px">Stf:s namn</label>
                 <input type="text" id="a_stf_namn" placeholder="Stf:s namn">
 
@@ -215,19 +203,12 @@
                     <div class="section-title">Samla patrullen</div>
                     <div class="section-subtitle">Gemensam samling och planering</div>
                 </div>
-                <span class="step-badge" id="badge_3">&#x2B1C;</span>
             </summary>
             <div class="step-content">
-                <label class="check-row">
-                    <input type="checkbox" id="s1_samlad" onchange="updateProgress()">
-                    <span>Patrull samlad p&aring; skyddad plats</span>
-                </label>
+                <p class="step-note">Patrull samlad p&aring; skyddad plats</p>
                 <label for="s1_plats" style="margin-top:8px">Samlingsplats</label>
                 <input type="text" id="s1_plats" placeholder="Samlingsplats">
-                <label class="check-row" style="margin-top:8px">
-                    <input type="checkbox" id="s1_plan" onchange="updateProgress()">
-                    <span>Kompletterande planering genomf&ouml;rd gemensamt</span>
-                </label>
+                <p class="step-note">Kompletterande planering genomf&ouml;rd gemensamt</p>
             </div>
         </details>
 
@@ -239,22 +220,21 @@
                     <div class="section-title">Stridsberedskap</div>
                     <div class="section-subtitle">Materiel och maskering</div>
                 </div>
-                <span class="step-badge" id="badge_4">&#x2B1C;</span>
             </summary>
             <div class="step-content">
-                <label class="check-row"><input type="checkbox" id="ss_ammo" onchange="updateProgress()"><span>Ammunition iordningstä&auml;lld</span></label>
-                <label class="check-row"><input type="checkbox" id="ss_extra_ammo" onchange="updateProgress()"><span>Extra am (pskott, handgranater etc.)</span></label>
-                <label class="check-row"><input type="checkbox" id="ss_radio" onchange="updateProgress()"><span>Radioapparat klar</span></label>
-                <label class="check-row"><input type="checkbox" id="ss_kik" onchange="updateProgress()"><span>Bildförstärkare/kikare</span></label>
-                <label class="check-row"><input type="checkbox" id="ss_signal" onchange="updateProgress()"><span>Signalpistol</span></label>
-                <label class="check-row"><input type="checkbox" id="ss_mat" onchange="updateProgress()"><span>Livsmedel</span></label>
-                <label class="check-row"><input type="checkbox" id="ss_sjv" onchange="updateProgress()"><span>Sjukv&aring;rdsmateriel</span></label>
-                <label class="check-row"><input type="checkbox" id="ss_sprg" onchange="updateProgress()"><span>Sprängmedel (vid behov)</span></label>
-                <label class="check-row"><input type="checkbox" id="ss_mask_ans" onchange="updateProgress()"><span>Maskering &mdash; ansikte</span></label>
-                <label class="check-row"><input type="checkbox" id="ss_mask_hand" onchange="updateProgress()"><span>Maskering &mdash; händer</span></label>
-                <label class="check-row"><input type="checkbox" id="ss_mask_unif" onchange="updateProgress()"><span>Maskering &mdash; uniform/utrustning</span></label>
-                <label class="check-row"><input type="checkbox" id="ss_mark" onchange="updateProgress()"><span>Märkning f&ouml;r igenkänning (band/tejp)</span></label>
-                <label class="check-row"><input type="checkbox" id="ss_dok" onchange="updateProgress()"><span>Sekretesshandlingar kvarlämnade/f&ouml;rst&ouml;rda</span></label>
+                <p class="step-note">Ammunition iordningstä&auml;lld</p>
+                <p class="step-note">Extra am (pskott, handgranater etc.)</p>
+                <p class="step-note">Radioapparat klar</p>
+                <p class="step-note">Bildförstärkare/kikare</p>
+                <p class="step-note">Signalpistol</p>
+                <p class="step-note">Livsmedel</p>
+                <p class="step-note">Sjukv&aring;rdsmateriel</p>
+                <p class="step-note">Sprängmedel (vid behov)</p>
+                <p class="step-note">Maskering &mdash; ansikte</p>
+                <p class="step-note">Maskering &mdash; händer</p>
+                <p class="step-note">Maskering &mdash; uniform/utrustning</p>
+                <p class="step-note">Märkning f&ouml;r igenkänning (band/tejp)</p>
+                <p class="step-note">Sekretesshandlingar kvarlämnade/f&ouml;rst&ouml;rda</p>
                 <label for="ss_ovrigt" style="margin-top:10px">&Ouml;vrigt materiel</label>
                 <textarea id="ss_ovrigt" rows="2" placeholder="&Ouml;vrigt materiel..."></textarea>
             </div>
@@ -268,13 +248,9 @@
                     <div class="section-title">Orientera patrullen</div>
                     <div class="section-subtitle">Lägesunderrättelse och plandetaljer</div>
                 </div>
-                <span class="step-badge" id="badge_5">&#x2B1C;</span>
             </summary>
             <div class="step-content">
-                <label class="check-row">
-                    <input type="checkbox" id="o_genomford" onchange="updateProgress()">
-                    <span>Orientering genomf&ouml;rd</span>
-                </label>
+                <p class="step-note">Orientering genomf&ouml;rd</p>
                 <label for="o_fiende" style="margin-top:8px">Fienden</label>
                 <textarea id="o_fiende" placeholder="Fienden..."></textarea>
                 <label for="o_egna" style="margin-top:10px">Egna f&ouml;rband</label>
@@ -293,7 +269,7 @@
                 <label for="o_atersaml" style="margin-top:10px">&Aring;tersamlingsplatser</label>
                 <textarea id="o_atersaml" placeholder="&Aring;tersamlingsplatser om patrullen skingras..."></textarea>
                 <label for="o_visat" style="margin-top:10px">Orientering visad p&aring;</label>
-                <select id="o_visat" onchange="updateProgress()">
+                <select id="o_visat">
                     <option value="Karta">Karta</option>
                     <option value="Terr&auml;ngskiss">Terr&auml;ngskiss</option>
                     <option value="I terr&auml;ngen">I terr&auml;ngen</option>
@@ -309,7 +285,6 @@
                     <div class="section-title">Indela patrullen</div>
                     <div class="section-subtitle">Vem g&ouml;r vad och bevakar vad</div>
                 </div>
-                <span class="step-badge" id="badge_6">&#x2B1C;</span>
             </summary>
             <div class="step-content">
                 <div id="indelaLista"></div>
@@ -327,25 +302,12 @@
                     <div class="section-title">Kontrollera</div>
                     <div class="section-subtitle">Verifiering av kunskap och utrustning</div>
                 </div>
-                <span class="step-badge" id="badge_7">&#x2B1C;</span>
             </summary>
             <div class="step-content">
-                <label class="check-row">
-                    <input type="checkbox" id="k_uppgift" onchange="updateProgress()">
-                    <span>Alla vet sin uppgift (verifierat via fr&aring;gor)</span>
-                </label>
-                <label class="check-row">
-                    <input type="checkbox" id="k_utr" onchange="updateProgress()">
-                    <span>Utrustning s&auml;ker &mdash; skramlar ej, inga reflexer</span>
-                </label>
-                <label class="check-row">
-                    <input type="checkbox" id="k_dok" onchange="updateProgress()">
-                    <span>Sekretesshandlingar kvarlämnade/f&ouml;rst&ouml;rda</span>
-                </label>
-                <label class="check-row">
-                    <input type="checkbox" id="k_ovn" onchange="updateProgress()">
-                    <span>&Ouml;vning av moment genomf&ouml;rd (vid tid/behov)</span>
-                </label>
+                <p class="step-note">Alla vet sin uppgift (verifierat via fr&aring;gor)</p>
+                <p class="step-note">Utrustning s&auml;ker &mdash; skramlar ej, inga reflexer</p>
+                <p class="step-note">Sekretesshandlingar kvarlämnade/f&ouml;rst&ouml;rda</p>
+                <p class="step-note">&Ouml;vning av moment genomf&ouml;rd (vid tid/behov)</p>
                 <label for="k_noter" style="margin-top:8px">Noteringar fr&aring;n kontrollen</label>
                 <textarea id="k_noter" rows="2" placeholder="Noteringar fr&aring;n kontrollen..."></textarea>
             </div>
@@ -359,13 +321,9 @@
                     <div class="section-title">Anmäl klar till chef</div>
                     <div class="section-subtitle">Patrullen redo att utg&aring;</div>
                 </div>
-                <span class="step-badge" id="badge_8">&#x2B1C;</span>
             </summary>
             <div class="step-content">
-                <label class="check-row">
-                    <input type="checkbox" id="an_anmalt" onchange="updateProgress()">
-                    <span>Anmält att patrullen &auml;r klar att utg&aring;</span>
-                </label>
+                <p class="step-note">Anmält att patrullen &auml;r klar att utg&aring;</p>
                 <label for="an_till" style="margin-top:8px">Till vem anmäldes</label>
                 <input type="text" id="an_till" placeholder="Till vem anmäldes (anropssignal/befattning)">
                 <label for="an_stund" style="margin-top:10px">Utgångstid (TNR):</label>
@@ -455,7 +413,6 @@ function addPatrull() {
         <button class="btn-remove-sm" onclick="removeCard('patrullCard_${patrullCount}')" title="Ta bort">&#10005;</button>
     `;
     lista.appendChild(card);
-    updateProgress();
 }
 
 // ============================================================
@@ -475,51 +432,16 @@ function addIndela() {
         <button class="btn-remove-sm" onclick="removeIndela('indelaCard_${indelaCount}')" title="Ta bort">&#10005;</button>
     `;
     lista.appendChild(card);
-    updateProgress();
 }
 
 function removeCard(id) {
     const el = document.getElementById(id);
     if (el) el.remove();
-    updateProgress();
 }
 
 function removeIndela(id) {
     const el = document.getElementById(id);
     if (el) el.remove();
-    updateProgress();
-}
-
-// ============================================================
-// PROGRESS
-// ============================================================
-function updateProgress() {
-    const ss_ids = ['ss_ammo','ss_extra_ammo','ss_radio','ss_kik','ss_signal','ss_mat','ss_sjv','ss_sprg','ss_mask_ans','ss_mask_hand','ss_mask_unif','ss_mark','ss_dok'];
-
-    const steg = [
-        document.getElementById('r_rep')?.checked,
-        document.getElementById('a_stf_check')?.checked,
-        document.getElementById('s1_samlad')?.checked,
-        ss_ids.every(id => document.getElementById(id)?.checked),
-        document.getElementById('o_genomford')?.checked,
-        (document.getElementById('indelaLista')?.children.length || 0) > 0,
-        document.getElementById('k_uppgift')?.checked && document.getElementById('k_utr')?.checked,
-        document.getElementById('an_anmalt')?.checked,
-    ];
-
-    const done = steg.filter(Boolean).length;
-    document.getElementById('progressBar').style.width = (done / 8 * 100) + '%';
-    document.getElementById('progressText').textContent = `${done} / 8 steg klara`;
-
-    steg.forEach((ok, i) => {
-        const badge = document.getElementById(`badge_${i + 1}`);
-        const detail = document.getElementById(`step_${i + 1}`);
-        if (badge) badge.textContent = ok ? '\u2705' : '\u2B1C';
-        if (detail) {
-            if (ok) detail.classList.add('done');
-            else detail.classList.remove('done');
-        }
-    });
 }
 
 // ============================================================
@@ -695,10 +617,8 @@ function clearAll() {
     patrullCount = 0;
     indelaCount = 0;
     document.querySelectorAll('input[type="text"], textarea').forEach(el => el.value = '');
-    document.querySelectorAll('input[type="checkbox"]').forEach(el => el.checked = false);
     goBack();
     setNow();
-    updateProgress();
     for (let i = 0; i < 4; i++) addPatrull();
     addIndela(); addIndela();
 }
@@ -711,7 +631,6 @@ document.addEventListener('DOMContentLoaded', function() {
     for (let i = 0; i < 4; i++) addPatrull();
     addIndela();
     addIndela();
-    updateProgress();
 });
 
 // ============================================================

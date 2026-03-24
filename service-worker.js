@@ -1,4 +1,4 @@
-const CACHE = 'hv-v7';
+const CACHE = 'hv-v8';
 const FILES = [
   './',
   './index.html',
