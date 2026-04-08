@@ -667,23 +667,19 @@ document.addEventListener('DOMContentLoaded', () => {
 // ── Interaktiv karta för PLATS ───────────────────────────────────────────────
 let mapInstance = null, mapMarker = null, mapSelectedMgrs = '';
 let mapViewportRestore = null;
-let mapBodyOverflowRestore = '';
 
 function lockViewportForMapModal() {
     const viewport = document.querySelector('meta[name="viewport"]');
     if (viewport) {
         if (mapViewportRestore === null) mapViewportRestore = viewport.getAttribute('content') || '';
-        viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
+        viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0');
     }
-    mapBodyOverflowRestore = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
     window.scrollTo(0, 0);
 }
 
 function restoreViewportAfterMapModal() {
     const viewport = document.querySelector('meta[name="viewport"]');
     if (viewport && mapViewportRestore !== null) viewport.setAttribute('content', mapViewportRestore);
-    document.body.style.overflow = mapBodyOverflowRestore || '';
 }
 
 function openMapModal() {
